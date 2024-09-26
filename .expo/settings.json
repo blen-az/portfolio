@@ -1,0 +1,19 @@
+{
+  "hostType": "lan",
+  "lanType": "ip",
+  "dev": true,
+  "minify": false,
+  "urlRandomness": null,
+  "https": false,
+  "tailwindCSS.includeLanguages": {
+    "plaintext": "css",
+    "javascript": "javascript",
+    "javascriptreact": "javascript",
+    "typescript": "typescript",
+    "typescriptreact": "typescript"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "tailwindCSS.emmetCompletions": true
+}
