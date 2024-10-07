@@ -1,11 +1,15 @@
-import { View, Text, StyleSheet, Image, StatusBar, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
-import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Image, StatusBar, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useRef, useState } from 'react';
 import { Octicons } from '@expo/vector-icons'; // Import Octicons
 import { useRouter } from 'expo-router'; // Import useRouter for navigation
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useAuth } from '../context/authContext'; // Ensure correct path to AuthContext
 
 export default function SignUp() {
     const router = useRouter(); // Initialize router
+    const { register } = useAuth(); // Get register from AuthContext
+
+    const [loading, setLoading] = useState(false); // Add loading state
 
     const usernameRef = useRef("");
     const emailRef = useRef("");
@@ -16,7 +20,26 @@ export default function SignUp() {
             Alert.alert('Sign Up', "Please fill all the fields!");
             return;
         }
-        // Sign up logic here
+
+        setLoading(true); // Set loading to true when sign-up starts
+
+        try {
+            // Call the register function from your AuthContext
+            let response = await register(emailRef.current, passwordRef.current, usernameRef.current, 'defaultProfileUrl');
+            console.log('got result: ', response);
+
+            if (!response.success) {
+                Alert.alert('Sign Up', response.msg);
+            } else {
+                Alert.alert('Sign Up', 'Account created successfully!');
+                router.push('/home'); // Navigate to the home page after successful sign-up
+            }
+        } catch (error) {
+            Alert.alert('Sign Up Error', 'An error occurred. Please try again.');
+            console.error(error);
+        } finally {
+            setLoading(false); // Set loading to false when sign-up finishes
+        }
     };
 
     return (
@@ -68,8 +91,12 @@ export default function SignUp() {
                         </View>
 
                         {/* Sign Up Button */}
-                        <TouchableOpacity onPress={handleSignUp} style={styles.button}>
-                            <Text style={styles.buttonText}>Sign Up</Text>
+                        <TouchableOpacity onPress={handleSignUp} style={styles.button} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                            ) : (
+                                <Text style={styles.buttonText}>Sign Up</Text>
+                            )}
                         </TouchableOpacity>
 
                         {/* Sign In Link */}

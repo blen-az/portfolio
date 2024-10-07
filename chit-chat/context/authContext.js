@@ -1,6 +1,6 @@
 import { children, createContext, useContext, useEffect, useState } from "react";
-import {onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword} from 'firebase/auth';
-import { auth } from "../firebaseConfig";
+import {onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+import { auth,db } from "../firebaseConfig";
 import {addDoc, doc, getDoc, setDoc} from 'firebase/firestore'
 
 
@@ -11,6 +11,7 @@ export const AuthContextProvider = ({children})=>{
     const [isAuthenticated, setIsAuthenticated] = useState(undefined);
 
     useEffect(()=>{
+        console.log('got user; ',user);
         const unsub = onAuthStateChanged(auth, (user)=>{
             if(user){
                 setIsAuthenticated(true);
@@ -26,17 +27,22 @@ export const AuthContextProvider = ({children})=>{
 
     const login = async (email, password)=>{
         try{
-
+            const response = await signInWithEmailAndPassword(auth, email, password);
+            return {success:true}
         }catch(e){
-
+            let msg = e.message
+            if(msg.includes('(auth/invalid-email)')) msg='Invalid email';
+            if(msg.includes('(auth/network-request-failed)')) msg='Wrong credentials';
+            return {success: false, msg};
         }
     }
 
     const logout = async ()=>{
         try{
-
+            await signOut(auth);
+            return {success: true}
         }catch(e){
-            
+            return {success: false, msg: e.message, error: e};
         }
     }
 
@@ -55,7 +61,11 @@ export const AuthContextProvider = ({children})=>{
 
 
         }catch(e){
-            return {success: false, msg: e.message};
+            let msg = e.message
+            if(msg.includes('(auth/invalid-email)')) msg='Invalid email';
+            if(msg.includes('(auth/email-already-in-use)')) msg='Email already exists';
+
+            return {success: false, msg};
         }
     }
 

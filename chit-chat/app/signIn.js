@@ -2,20 +2,34 @@ import { View, Text, StyleSheet, Image, StatusBar, TextInput, TouchableOpacity, 
 import React, { useRef, useState } from 'react';
 import { Octicons } from '@expo/vector-icons'; // <-- Import Octicons here
 import { useRouter } from 'expo-router'; // <-- Import useRouter for navigation
+ 
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useAuth } from '../context/authContext';
 
 export default function SignIn() {
     const router = useRouter(); // Initialize router
-    const[loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
 
     const emailRef = useRef("");
     const passwordRef = useRef("");
 
-    const handlelogin = async ()=>{
-        if(!emailRef.current || !passwordRef.current){
-            Alert.alert('Sign In', "please fill all the fields!");
+    const handleLogin = async () => {
+        if (!emailRef.current || !passwordRef.current) {
+            Alert.alert('Sign In', "Please fill all the fields!");
+            return;
         }
-    }
+        setLoading(true);
+        const response = await login(emailRef.current, passwordRef.current);
+        setLoading(false);
+        console.log('sign in response: ', response);
+        if (!response.success) {
+            Alert.alert('Sign In', response.msg);
+            return;
+        }
+        // Redirect to home page or wherever needed after successful login
+        router.push('/home'); // Example route to redirect after successful login
+    };
 
     return (
         <View style={styles.container}>
@@ -25,7 +39,7 @@ export default function SignIn() {
                 <View style={styles.imageContainer}>
                     <Image
                         style={styles.image}
-                        resizeMode='contain'
+                        resizeMode="contain"
                         source={require('../assets/images/login.png')}
                     />
                 </View>
@@ -37,18 +51,18 @@ export default function SignIn() {
                         <View style={styles.mail}>
                             <Octicons name="mail" size={hp(2.7)} color="gray" />
                             <TextInput
-                                onChange={value=> passwordRef.current=value}
+                                onChangeText={value => (emailRef.current = value)}
                                 style={styles.textInput}
-                                placeholder='Email Address'
+                                placeholder="Email Address"
                                 placeholderTextColor={'gray'}
                             />
                         </View>
                         <View style={styles.mail}>
                             <Octicons name="lock" size={hp(2.7)} color="gray" />
                             <TextInput
-                                onChange={value=> emailRef.current=value}
+                                onChangeText={value => (passwordRef.current = value)}
                                 style={styles.textInput}
-                                placeholder='Password'
+                                placeholder="Password"
                                 placeholderTextColor={'gray'}
                                 secureTextEntry
                             />
@@ -61,8 +75,7 @@ export default function SignIn() {
                     </TouchableOpacity>
 
                     {/* Sign In Button */}
-                    
-                    <TouchableOpacity onPress={handlelogin} style={styles.button}>
+                    <TouchableOpacity onPress={handleLogin} style={styles.button}>
                         <Text style={styles.buttonText}>Sign In</Text>
                     </TouchableOpacity>
 
@@ -122,12 +135,12 @@ const styles = StyleSheet.create({
     },
     forgotPassword: {
         textAlign: 'right',
-        color: '#3182CE', // Blue color for the link
+        color: '#3182CE',
         marginTop: hp(1),
     },
     button: {
         marginTop: hp(3),
-        backgroundColor: '#3182CE', // Blue color for the button
+        backgroundColor: '#3182CE',
         paddingVertical: hp(1.5),
         borderRadius: 8,
         alignItems: 'center',
@@ -140,10 +153,10 @@ const styles = StyleSheet.create({
     signUpText: {
         marginTop: hp(2),
         textAlign: 'center',
-        color: '#4A5568', // Neutral color for the text
+        color: '#4A5568',
     },
     signUpLink: {
-        color: '#3182CE', // Blue color for the link
+        color: '#3182CE',
         fontWeight: 'bold',
     },
 });
