@@ -17,7 +17,7 @@ const AppNavigator = () => {
   return (
     
     <Stack.Navigator>
-      {/* Hide the default header for all screens */}
+  
        <Stack.Screen 
         name="Login" 
         component={LoginScreen} 
