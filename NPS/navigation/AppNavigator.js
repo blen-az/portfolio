@@ -7,8 +7,8 @@ import RequestScreen from '../screens/RequestScreen';
 import BookingScreen from '../screens/BookingScreen';
 import ChatScreen from '../screens/ChatScreen';
 import InfoScreen from '../screens/InfoScreen';
-import ProfileScreen from '../screens/ProfileScreen'; // Import ProfileScreen
-import TransactionsScreen from '../screens/TransactionsScreen'; // Import TransactionsScreen
+import ProfileScreen from '../screens/ProfileScreen';
+import TransactionsScreen from '../screens/TransactionsScreen';
 
 const Stack = createStackNavigator();
 const AppNavigator = () => {
@@ -49,13 +49,11 @@ const AppNavigator = () => {
         component={InfoScreen}
         options={{ headerShown: false }}
       />
-      {/* Adding TransactionsScreen to the stack */}
       <Stack.Screen
         name="Transactions"
         component={TransactionsScreen}
         options={{ headerShown: false }}
       />
-      {/* Adding ProfileScreen to the stack */}
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
