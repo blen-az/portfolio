@@ -6,7 +6,7 @@ const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const scheme = useColorScheme();
-  const theme = scheme === 'dark' ? darkTheme : lightTheme;
+  const theme = lightTheme;
 
   const sendMessage = () => {
     setMessages([...messages, message]);

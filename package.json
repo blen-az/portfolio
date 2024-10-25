@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "expo": "^51.0.38",
     "lottie-react-native": "^6.7.2"
   }
 }

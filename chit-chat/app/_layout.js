@@ -38,8 +38,8 @@ export default function RootLayout() {
   return (
     <MenuProvider>
       <AuthContextProvider>
-      <MainLayout />
-     </AuthContextProvider>
+        <MainLayout />
+      </AuthContextProvider>
     </MenuProvider>
 
     

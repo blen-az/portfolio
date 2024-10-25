@@ -1,36 +1,57 @@
+// RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { lightTheme } from './Theme'; // Import your light theme
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const { register } = useAuth();
+  const [error, setError] = useState(null);
 
-  const handleRegister = () => {
-    // Perform user registration logic (Firebase/Auth API)
-    // Navigate to user home screen after registration
-    navigation.navigate('Home');
+  const handleRegister = async () => {
+    const response = await register(email, password, username);
+    if (!response.success) {
+      setError(response.msg);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+    <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
+      <Text style={[styles.title, { color: lightTheme.text }]}>Register</Text>
+      {error && <Text style={[styles.error, { color: 'red' }]}>{error}</Text>}
+      
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+        placeholder="Username"
+        placeholderTextColor={lightTheme.text}
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Email"
+        placeholderTextColor={lightTheme.text}
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Password"
+        placeholderTextColor={lightTheme.text}
+        secureTextEntry
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleRegister}>
+        <Text style={[styles.buttonText, { color: lightTheme.text }]}>Register</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={{ color: lightTheme.text }}>Already have an account? Login</Text>
       </TouchableOpacity>
     </View>
   );
@@ -48,22 +69,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
+    width: '100%',
+    padding: 15,
+    borderRadius: 8,
     marginBottom: 15,
   },
   button: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 15,
-    borderRadius: 10,
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 10,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 18,
+  },
+  error: {
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 

@@ -1,13 +1,15 @@
-// App.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import AppNavigator from './navigation/AppNavigator'; // Adjust the path if necessary
+import { AuthContextProvider } from './context/AuthContext'; // Ensure it's named correctly
+import AppNavigator from './navigation/AppNavigator'; // Ensure this file exports AppNavigator
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <AppNavigator />
-    </NavigationContainer>
+    <AuthContextProvider>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </AuthContextProvider>
   );
 };
 

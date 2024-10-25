@@ -1,66 +1,74 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { lightTheme, darkTheme } from './Theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 
 const HomeScreen = ({ navigation }) => {
   const scheme = useColorScheme();
-  const theme = scheme === 'dark' ? darkTheme : lightTheme;
+  const theme = lightTheme;
+  const { logout } = useContext(AuthContext); // Use AuthContext to access logout
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header]}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
           <Icon name="menu" size={28} color={theme.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>NPS</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={async () => await logout()}>
           <Icon name="logout" size={28} color={theme.text} />
         </TouchableOpacity>
       </View>
 
-      {/* Middle section with buttons */}
+      {/* Middle section */}
       <View style={styles.middleSection}>
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: theme.primary }]} 
           onPress={() => navigation.navigate('Request')}>
-          <Icon name="payment" size={24} color={theme.iconColor} />
-          <Text style={[styles.buttonText, { color: theme.buttonText }]}>Make a Request</Text>
+          <Icon name="payment" size={24} color={theme.text} />
+          <Text style={[styles.buttonText, { color: theme.text }]}>Make a Request</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: theme.primary }]} 
           onPress={() => navigation.navigate('Booking')}>
-          <Icon name="schedule" size={24} color={theme.iconColor} />
-          <Text style={[styles.buttonText, { color: theme.buttonText }]}>Schedule a Booking</Text>
+          <Icon name="schedule" size={24} color={theme.text} />
+          <Text style={[styles.buttonText, { color: theme.text }]}>Schedule a Booking</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: theme.primary }]} 
           onPress={() => navigation.navigate('Chat')}>
-          <Icon name="chat" size={24} color={theme.iconColor} />
-          <Text style={[styles.buttonText, { color: theme.buttonText }]}>Chat</Text>
+          <Icon name="chat" size={24} color={theme.text} />
+          <Text style={[styles.buttonText, { color: theme.text }]}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: theme.primary }]} 
+          onPress={() => navigation.navigate('Info')}>
+          <Icon name="info" size={24} color={theme.text} />
+          <Text style={[styles.buttonText, { color: theme.text }]}>Information</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Footer with navigation icons */}
+      {/* Footer  */}
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
-          <Icon name="home" size={28} color={theme.iconColor} />
-          <Text style={[styles.footerText, { color: theme.iconColor }]}>Home</Text>
+          <Icon name="home" size={28} color={theme.text} />
+          <Text style={[styles.footerText, { color: theme.text }]}>Home</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Transactions')} style={styles.footerItem}>
-          <Icon name="receipt" size={28} color={theme.iconColor} />
-          <Text style={[styles.footerText, { color: theme.iconColor }]}>Transactions</Text>
+          <Icon name="receipt" size={28} color={theme.text} />
+          <Text style={[styles.footerText, { color: theme.text }]}>Transactions</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
-          <Icon name="person" size={28} color={theme.iconColor} />
-          <Text style={[styles.footerText, { color: theme.iconColor }]}>Profile</Text>
+          <Icon name="person" size={28} color={theme.text} />
+          <Text style={[styles.footerText, { color: theme.text }]}>Profile</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -78,10 +86,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#6200EE', // You can adjust the color to match the app's theme
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    paddingTop: 10, // Add padding to the top
+    paddingTop: 10,
   },
   headerTitle: {
     fontSize: 24,

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, StatusBar, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, StatusBar, TextInput, TouchableOpacity, Alert,ActivityIndicator } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { Octicons } from '@expo/vector-icons'; // <-- Import Octicons here
 import { useRouter } from 'expo-router'; // <-- Import useRouter for navigation
