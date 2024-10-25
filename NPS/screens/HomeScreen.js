@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { lightTheme, darkTheme } from './Theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { AuthContext } from '../context/AuthContext'; 
 
 const HomeScreen = ({ navigation }) => {
   const scheme = useColorScheme();
   const theme = lightTheme;
-  const { logout } = useContext(AuthContext); // Use AuthContext to access logout
+  const { logout } = useContext(AuthContext); 
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
