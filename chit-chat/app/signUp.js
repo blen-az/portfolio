@@ -4,19 +4,27 @@ import { Octicons } from '@expo/vector-icons'; // Import Octicons
 import { useRouter } from 'expo-router'; // Import useRouter for navigation
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useAuth } from '../context/authContext'; // Ensure correct path to AuthContext
+import { doc, setDoc } from 'firebase/firestore'; // Import Firestore functions
+import { db } from '../firebaseConfig'; // Ensure correct import for Firestore instance
 
 export default function SignUp() {
     const router = useRouter(); // Initialize router
-    const { register } = useAuth(); // Get register from AuthContext
+    const { register } = useAuth(); // Get register function from AuthContext
 
     const [loading, setLoading] = useState(false); // Add loading state
 
     const usernameRef = useRef("");
     const emailRef = useRef("");
     const passwordRef = useRef("");
+    const profilePictureRef = useRef(""); // New ref for profile picture URL
 
     const handleSignUp = async () => {
-        if (!usernameRef.current || !emailRef.current || !passwordRef.current) {
+        const username = usernameRef.current.trim();
+        const email = emailRef.current.trim();
+        const password = passwordRef.current;
+        const profilePicture = profilePictureRef.current.trim(); // Get the profile picture URL
+
+        if (!username || !email || !password || !profilePicture) {
             Alert.alert('Sign Up', "Please fill all the fields!");
             return;
         }
@@ -25,18 +33,28 @@ export default function SignUp() {
 
         try {
             // Call the register function from your AuthContext
-            let response = await register(emailRef.current, passwordRef.current, usernameRef.current, 'defaultProfileUrl');
-            console.log('got result: ', response);
+            const response = await register(email, password, username, profilePicture);
 
             if (!response.success) {
                 Alert.alert('Sign Up', response.msg);
             } else {
+                // Get the user ID from the response
+                const userId = response.userId; 
+                
+                // Create a document in the Firestore 'users' collection
+                await setDoc(doc(db, 'users', userId), {
+                    username,
+                    email,
+                    profilePicture, // Store the provided profile picture URL
+                    createdAt: new Date() // Optional: record the creation time
+                });
+
                 Alert.alert('Sign Up', 'Account created successfully!');
                 router.push('/home'); // Navigate to the home page after successful sign-up
             }
         } catch (error) {
+            console.error("Error during sign up: ", error);
             Alert.alert('Sign Up Error', 'An error occurred. Please try again.');
-            console.error(error);
         } finally {
             setLoading(false); // Set loading to false when sign-up finishes
         }
@@ -47,7 +65,7 @@ export default function SignUp() {
             <StatusBar style="dark" />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.innerContainer}>
-                    {/* image */}
+                    {/* Image */}
                     <View style={styles.imageContainer}>
                         <Image
                             style={styles.image}
@@ -58,7 +76,7 @@ export default function SignUp() {
 
                     <View style={styles.textContainer}>
                         <Text style={styles.text}>Sign Up</Text>
-                        {/* inputs */}
+                        {/* Inputs */}
                         <View style={{ gap: hp(2) }}>
                             <View style={styles.inputContainer}>
                                 <Octicons name="person" size={hp(2.7)} color="gray" />
@@ -86,6 +104,15 @@ export default function SignUp() {
                                     placeholder='Password'
                                     placeholderTextColor={'gray'}
                                     secureTextEntry
+                                />
+                            </View>
+                            <View style={styles.inputContainer}>
+                                <Octicons name="link" size={hp(2.7)} color="gray" />
+                                <TextInput
+                                    onChangeText={(value) => profilePictureRef.current = value}
+                                    style={styles.textInput}
+                                    placeholder='Profile Picture URL'
+                                    placeholderTextColor={'gray'}
                                 />
                             </View>
                         </View>

@@ -1,5 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import React, { useEffect } from 'react';
+import { MenuProvider } from 'react-native-popup-menu';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { AuthContextProvider, useAuth } from '../context/authContext';
 
@@ -35,8 +36,12 @@ const styles = StyleSheet.create({
 
 export default function RootLayout() {
   return (
-    <AuthContextProvider>
+    <MenuProvider>
+      <AuthContextProvider>
       <MainLayout />
-    </AuthContextProvider>
+     </AuthContextProvider>
+    </MenuProvider>
+
+    
   );
 }
