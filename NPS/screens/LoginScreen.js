@@ -17,15 +17,15 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
     const response = await login(email, password);
-    setLoading(false); // Stop loading
+    setLoading(false); 
 
     if (response.success) {
-      setError(null); // Clear any previous error
-      navigation.navigate('Home'); // Navigate to HomeScreen on successful login
+      setError(null); 
+      navigation.navigate('Home');
     } else {
-      setError(response.msg); // Display error message
+      setError(response.msg); 
     }
   };
 
@@ -57,7 +57,7 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity
         style={[styles.button, { backgroundColor: lightTheme.primary }]}
         onPress={handleLogin}
-        disabled={loading} // Disable button while loading
+        disabled={loading}
       >
         {loading ? (
           <ActivityIndicator size="small" color={lightTheme.text} />
