@@ -1,8 +1,8 @@
-// RegisterScreen.js
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { lightTheme } from './Theme'; // Import your light theme
+import { lightTheme } from './Theme';
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
