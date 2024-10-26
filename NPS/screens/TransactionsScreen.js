@@ -4,10 +4,10 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Ionicons } from '@expo/vector-icons'; // Using icons for visual appeal
+import { Ionicons } from '@expo/vector-icons';
 import { lightTheme } from './Theme'; 
 const TransactionsScreen = () => {
-  const { user } = useContext(AuthContext); // Get the authenticated user from AuthContext
+  const { user } = useContext(AuthContext); 
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
@@ -66,8 +66,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: lightTheme.background, // Light background
-  },
+    backgroundColor: lightTheme.background,
   title: {
     fontSize: 26,
     fontWeight: 'bold',

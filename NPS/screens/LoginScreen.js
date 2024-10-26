@@ -1,15 +1,15 @@
-// LoginScreen.js
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { lightTheme } from './Theme'; // Import your light theme
+import { lightTheme } from './Theme';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -17,15 +17,15 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
     const response = await login(email, password);
-    setLoading(false); // Stop loading
+    setLoading(false); 
 
     if (response.success) {
-      setError(null); // Clear any previous error
-      navigation.navigate('Home'); // Navigate to HomeScreen on successful login
+      setError(null); 
+      navigation.navigate('Home');
     } else {
-      setError(response.msg); // Display error message
+      setError(response.msg); 
     }
   };
 
@@ -57,7 +57,7 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity
         style={[styles.button, { backgroundColor: lightTheme.primary }]}
         onPress={handleLogin}
-        disabled={loading} // Disable button while loading
+        disabled={loading}
       >
         {loading ? (
           <ActivityIndicator size="small" color={lightTheme.text} />
