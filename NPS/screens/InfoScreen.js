@@ -9,7 +9,7 @@ const InfoScreen = ({Navigation})=> {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background}]}>
             <ScrollView>
             <Text style={[styles.title, { color: theme.text }]}>Information</Text>
-            <View style={[styles.infoContainer, { backgroundColor:theme.primary }]}>
+            <View style={[styles.infoContainer, { backgroundColor:theme.secondary }]}>
             <Text style={[styles.text, { color: theme.text }]}>...</Text>
 
             </View>

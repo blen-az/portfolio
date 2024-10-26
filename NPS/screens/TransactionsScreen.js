@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { lightTheme } from './Theme'; 
+
 const TransactionsScreen = () => {
   const { user } = useContext(AuthContext); 
   const [transactions, setTransactions] = useState([]);
@@ -67,6 +68,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: lightTheme.background,
+  }, // <-- Added closing brace for container
   title: {
     fontSize: 26,
     fontWeight: 'bold',
