@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    marginBottom: 10, // Ensure some margin at the bottom
+    marginBottom: 10,
   },
   messageBubble: {
     padding: 10,

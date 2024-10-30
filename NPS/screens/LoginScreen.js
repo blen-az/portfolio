@@ -1,40 +1,46 @@
-
+// NPS/screens/LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useAuth } from '../context/AuthContext';
 import { lightTheme } from './Theme';
+import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigation = useNavigation();
 
-  const handleLogin = async () => {
+  // Handles login action, simulating a successful login response and handling UI feedback
+  const handleLogin = () => {
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
 
     setLoading(true);
-    const response = await login(email, password);
-    setLoading(false); 
 
-    if (response.success) {
-      setError(null); 
-      navigation.navigate('Home');
-    } else {
-      setError(response.msg); 
-    }
+    // Simulate API call for login (replace with actual authentication logic if needed)
+    setTimeout(() => {
+      setLoading(false);
+      setError(null);  // Clear error on success
+      console.log('Login successful');
+
+      // Navigate to Home screen
+      navigation.replace('Home');
+    }, 1000);  // Adjust delay as needed for UI feedback
+  };
+
+  // Navigate to Register screen
+  const navigateToRegister = () => {
+    navigation.navigate('Register');
   };
 
   return (
     <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
       <Text style={[styles.title, { color: lightTheme.text }]}>Login</Text>
       
-      {/* Display error message */}
-      {error && <Text style={[styles.error, { color: 'red', fontWeight: 'bold' }]}>{error}</Text>}
+      {error && <Text style={[styles.error, { color: 'red' }]}>{error}</Text>}
       
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -42,7 +48,7 @@ const LoginScreen = ({ navigation }) => {
         placeholderTextColor={lightTheme.text}
         value={email}
         onChangeText={setEmail}
-        autoCapitalize="none" // Ensure email is not auto-capitalized
+        autoCapitalize="none"
       />
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -53,7 +59,6 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setPassword}
       />
 
-      {/* Button or Loading Indicator */}
       <TouchableOpacity
         style={[styles.button, { backgroundColor: lightTheme.primary }]}
         onPress={handleLogin}
@@ -66,13 +71,14 @@ const LoginScreen = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={{ color: lightTheme.text }}>Don't have an account? Register</Text>
+      <TouchableOpacity onPress={navigateToRegister}>
+        <Text style={[styles.registerText, { color: lightTheme.text }]}>Don’t have an account? Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
+// Styles for the LoginScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -102,6 +108,11 @@ const styles = StyleSheet.create({
   error: {
     textAlign: 'center',
     marginBottom: 10,
+  },
+  registerText: {
+    textAlign: 'center',
+    marginTop: 15,
+    fontSize: 16,
   },
 });
 

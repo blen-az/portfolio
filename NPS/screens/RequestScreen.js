@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Image, Alert } from 'react-native';
+// NPS/screens/RequestScreen.js
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { lightTheme, darkTheme } from './Theme';
+import { lightTheme } from './Theme';
+import { saveRequest } from '../services/requestService'; // Adjust path as needed
+import { AuthContext } from '../context/AuthContext';
 
 const RequestScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
@@ -10,8 +13,7 @@ const RequestScreen = ({ navigation }) => {
   const [paymentType, setPaymentType] = useState('');
   const [notes, setNotes] = useState('');
   const [screenshot, setScreenshot] = useState(null);
-  const scheme = useColorScheme();
-  const theme = lightTheme;
+  const { user } = useContext(AuthContext);  // Access the current user
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -19,69 +21,96 @@ const RequestScreen = ({ navigation }) => {
       allowsEditing: true,
       aspect: [4, 3],
     });
-
     if (!result.canceled) {
       setScreenshot(result.uri);
     }
   };
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
+    if (!user) {
+      Alert.alert('Error', 'User not logged in');
+      return;
+    }
+
     if (!firstName.trim() || !lastName.trim() || !paymentType) {
       Alert.alert('Error', 'Please fill all the required fields (First Name, Last Name, and Payment Type)');
-    } else {
-      alert('Request Submitted');
+      return;
+    }
+
+    const requestDetails = {
+      firstName,
+      lastName,
+      paymentType,
+      notes,
+      screenshot,
+      userId: user.uid,
+      timestamp: new Date().toISOString(), // Optional: add a timestamp
+    };
+
+    try {
+      const response = await saveRequest(user.uid, requestDetails); // Save to Firebase Firestore
+      if (response.success) {
+        Alert.alert('Success', 'Request Submitted Successfully');
+        setFirstName('');
+        setLastName('');
+        setPaymentType('');
+        setNotes('');
+        setScreenshot(null);
+      } else {
+        Alert.alert('Error', 'Failed to submit the request');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'An error occurred');
     }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.text }]}>Submit a Payment Request</Text>
+    <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
+      <Text style={[styles.title, { color: lightTheme.text }]}>Submit a Payment Request</Text>
 
       <TextInput
-        style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="First Name"
-        placeholderTextColor={theme.text}
+        placeholderTextColor="#888"
         value={firstName}
         onChangeText={setFirstName}
       />
-
       <TextInput
-        style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Last Name"
-        placeholderTextColor={theme.text}
+        placeholderTextColor="#888"
         value={lastName}
         onChangeText={setLastName}
       />
-
       <Picker
         selectedValue={paymentType}
-        style={[styles.picker, { backgroundColor: theme.secondary, color: theme.text }]}
+        style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         onValueChange={(itemValue) => setPaymentType(itemValue)}
       >
-        
-        <Picker.Item label="SAT" value="SAT" />
+        <Picker.Item label="Select Payment Type" value="" />
+        <Picker.Item label="USMLE" value="USMLE" />
+        <Picker.Item label="OET" value="OET" />
+        <Picker.Item label="WES" value="WES" />
         <Picker.Item label="SOPHAS" value="SOPHAS" />
-        <Picker.Item label="TOEFL" value="TOEFL" />
-        <Picker.Item label="GRE" value="GRE" />
-        <Picker.Item label="Other" value="Other" />
+        <Picker.Item label="Duolingo English Test" value="Duolingo" />
+        <Picker.Item label="SAT" value="SAT" />
+        <Picker.Item label="Facebook and Instagram Boost Payments" value="Facebook Boost" />
+        <Picker.Item label="DHA Exam" value="DHA" />
+        <Picker.Item label="PLAB Exam" value="PLAB" />
+        <Picker.Item label="OTHERS" value="OTHERS" />
       </Picker>
-      <Text style={{ color: theme.text, marginBottom: 20 }}>Selected payment type: {paymentType}</Text>
-
-      
       <TextInput
-        style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Notes (Optional)"
-        placeholderTextColor={theme.text}
+        placeholderTextColor="#888"
         value={notes}
         onChangeText={setNotes}
       />
-
-      <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: theme.primary }]} onPress={handleSubmit}>
+      <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
         <Text style={styles.buttonText}>Upload Screenshot</Text>
       </TouchableOpacity>
-
       {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
-
-      <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleSubmit}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Request</Text>
       </TouchableOpacity>
     </View>

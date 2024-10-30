@@ -1,15 +1,47 @@
-// services/requestService.js
-import firebase from '../firebase';
+import { db } from '../firebase';
+import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 
-export const getRequests = async () => {
-  const snapshot = await firebase.firestore().collection('requests').get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+// Function to save a request in Firestore
+export const saveRequest = async (userId, requestDetails) => {
+  try {
+    const docRef = await addDoc(collection(db, 'requests'), {
+      userId,
+      ...requestDetails,
+      status: 'Pending', // Default status for a new request
+      timestamp: new Date().toISOString(), // Adding a timestamp for record-keeping
+    });
+    console.log("Document written with ID: ", docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    return { success: false, msg: error.message };
+  }
 };
 
-export const approveRequest = async (id) => {
-  return firebase.firestore().collection('requests').doc(id).update({ status: 'approved' });
+// Function to fetch all requests from Firestore
+export const fetchRequests = async () => {
+  try {
+    const requests = [];
+    const querySnapshot = await getDocs(collection(db, 'requests'));
+    querySnapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() });
+    });
+    return requests;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    return [];
+  }
 };
 
-export const declineRequest = async (id) => {
-  return firebase.firestore().collection('requests').doc(id).update({ status: 'declined' });
+// Function to update the status of a request in Firestore
+export const updateRequestStatus = async (requestId, newStatus) => {
+  try {
+    const requestRef = doc(db, 'requests', requestId);
+    await updateDoc(requestRef, { status: newStatus });
+    console.log(`Request ${requestId} status updated to ${newStatus}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating request status:", error);
+    return { success: false, msg: error.message };
+  }
 };

@@ -1,10 +1,13 @@
+// NPS/screens/BookingScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { lightTheme, darkTheme } from './Theme';
+import { lightTheme } from './Theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { db } from '../firebase'; // Import the Firestore database
+import { collection, addDoc } from 'firebase/firestore';
 
 const BookingScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
@@ -15,8 +18,6 @@ const BookingScreen = ({ navigation }) => {
   const [screenshot, setScreenshot] = useState(null);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const scheme = useColorScheme();
-  const theme = lightTheme;
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -36,59 +37,88 @@ const BookingScreen = ({ navigation }) => {
     setDate(currentDate);
   };
 
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!firstName.trim() || !lastName.trim() || !amount.trim()) {
       Alert.alert('Error', 'Please fill in all required fields (First Name, Last Name, and Amount).');
+      return;
+    }
 
-    }else{
-      alert('Booking Scheduled');
+    const bookingDetails = {
+      firstName,
+      lastName,
+      paymentType,
+      notes,
+      amount,
+      screenshot,
+      date: date.toISOString(),
+    };
+
+    try {
+      const docRef = await addDoc(collection(db, 'bookings'), bookingDetails);
+      Alert.alert('Success', 'Booking Scheduled Successfully!');
+      console.log("Document written with ID: ", docRef.id);
+
+      // Reset form after successful submission
+      setFirstName('');
+      setLastName('');
+      setPaymentType('SAT');
+      setAmount('');
+      setNotes('');
+      setScreenshot(null);
+      setDate(new Date());
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      Alert.alert('Error', 'Failed to schedule the booking');
     }
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: lightTheme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={[styles.title, { color: theme.text }]}>Schedule a Payment Booking</Text>
+        <Text style={[styles.title, { color: lightTheme.text }]}>Schedule a Payment Booking</Text>
 
         <TextInput
-          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="First Name"
-          placeholderTextColor={theme.text}
+          placeholderTextColor={lightTheme.text}
           value={firstName}
           onChangeText={setFirstName}
         />
         <TextInput
-          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Last Name"
-          placeholderTextColor={theme.text}
+          placeholderTextColor={lightTheme.text}
           value={lastName}
           onChangeText={setLastName}
         />
 
         <Picker
           selectedValue={paymentType}
-          style={[styles.picker, { backgroundColor: theme.secondary, color: theme.text }]}
+          style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           onValueChange={(itemValue) => setPaymentType(itemValue)}
         >
-          <Picker.Item label="SAT" value="SAT" />
+          <Picker.Item label="USMLE" value="USMLE" />
+          <Picker.Item label="OET" value="OET" />
+          <Picker.Item label="WES" value="WES" />
           <Picker.Item label="SOPHAS" value="SOPHAS" />
-          <Picker.Item label="TOEFL" value="TOEFL" />
-          <Picker.Item label="GRE" value="GRE" />
-          <Picker.Item label="Other" value="Other" />
+          <Picker.Item label="Duolingo English Test" value="Duolingo English Test" />
+          <Picker.Item label="SAT" value="SAT" />
+          <Picker.Item label="Facebook and Instagram Boost Payments" value="Facebook Boost" />
+          <Picker.Item label="DHA Exam" value="DHA" />
+          <Picker.Item label="PLAB Exam" value="PLAB" />
+          <Picker.Item label="OTHERS" value="OTHERS" />
         </Picker>
-        <Text style={{ color: theme.text, marginBottom: 20 }}>Selected payment type: {paymentType}</Text>
 
         <TextInput
-          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Amount"
-          placeholderTextColor={theme.text}
+          placeholderTextColor={lightTheme.text}
           value={amount}
           onChangeText={setAmount}
           keyboardType="numeric"
         />
 
-        <TouchableOpacity style={[styles.datePickerButton, { backgroundColor: theme.primary }]} onPress={() => setShowDatePicker(true)}>
+        <TouchableOpacity style={[styles.datePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowDatePicker(true)}>
           <Text style={styles.buttonText}>Pick a Date</Text>
         </TouchableOpacity>
         {showDatePicker && (
@@ -99,24 +129,24 @@ const BookingScreen = ({ navigation }) => {
             onChange={onChange}
           />
         )}
-        <Text style={{ color: theme.text, marginBottom: 20 }}>Selected Date: {date.toDateString()}</Text>
+        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Selected Date: {date.toDateString()}</Text>
 
         <TextInput
-          style={[styles.notesInput, { backgroundColor: theme.secondary, color: theme.text }]}
+          style={[styles.notesInput, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Additional Notes (Optional)"
-          placeholderTextColor={theme.text}
+          placeholderTextColor={lightTheme.text}
           value={notes}
           onChangeText={setNotes}
           multiline={true}
         />
 
-        <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: theme.primary }]} onPress={pickImage}>
+        <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
           <Text style={styles.buttonText}>Upload Screenshot (Optional)</Text>
         </TouchableOpacity>
 
         {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleSubmit}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit Booking</Text>
         </TouchableOpacity>
       </ScrollView>

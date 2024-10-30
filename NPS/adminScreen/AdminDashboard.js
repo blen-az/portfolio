@@ -1,16 +1,39 @@
-// NPS/screens/AdminDashboard.js
+// adminScreen/AdminDashboard.js
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const AdminDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Dashboard</Text>
-      {/* Navigation to Admin Screens */}
-      <Button title="Manage Requests" onPress={() => navigation.navigate('ManageRequests')} />
-      <Button title="Manage Bookings" onPress={() => navigation.navigate('ManageBookings')} />
-      <Button title="User Management" onPress={() => navigation.navigate('UserManagement')} />
-      <Button title="View Transactions" onPress={() => navigation.navigate('TransactionHistory')} />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('ManageRequests')}
+      >
+        <Text style={styles.buttonText}>Manage Requests</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('ManageBookings')}
+      >
+        <Text style={styles.buttonText}>Manage Bookings</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('UserManagement')}
+      >
+        <Text style={styles.buttonText}>User Management</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('TransactionHistory')}
+      >
+        <Text style={styles.buttonText}>Transaction History</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -18,13 +41,26 @@ const AdminDashboard = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 30,
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 25,
+    width: '80%',
+    alignItems: 'center',
     marginBottom: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
   },
 });
 
