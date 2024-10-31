@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } fro
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { lightTheme } from './Theme';
-import { saveRequest } from '../services/requestService'; // Adjust path as needed
+import { saveRequest } from '../services/requestService';
 import { AuthContext } from '../context/AuthContext';
 
 const RequestScreen = ({ navigation }) => {
@@ -12,8 +12,9 @@ const RequestScreen = ({ navigation }) => {
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('');
   const [notes, setNotes] = useState('');
+  const [socialMediaLink, setSocialMediaLink] = useState(''); // New state for social media link
   const [screenshot, setScreenshot] = useState(null);
-  const { user } = useContext(AuthContext);  // Access the current user
+  const { user } = useContext(AuthContext);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -42,19 +43,21 @@ const RequestScreen = ({ navigation }) => {
       lastName,
       paymentType,
       notes,
+      socialMediaLink, // Include social media link in request details
       screenshot,
       userId: user.uid,
-      timestamp: new Date().toISOString(), // Optional: add a timestamp
+      timestamp: new Date().toISOString(),
     };
 
     try {
-      const response = await saveRequest(user.uid, requestDetails); // Save to Firebase Firestore
+      const response = await saveRequest(user.uid, requestDetails);
       if (response.success) {
         Alert.alert('Success', 'Request Submitted Successfully');
         setFirstName('');
         setLastName('');
         setPaymentType('');
         setNotes('');
+        setSocialMediaLink('');
         setScreenshot(null);
       } else {
         Alert.alert('Error', 'Failed to submit the request');
@@ -101,11 +104,20 @@ const RequestScreen = ({ navigation }) => {
       </Picker>
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+        placeholder="Social Media Link (Optional)"
+        placeholderTextColor="#888"
+        value={socialMediaLink}
+        onChangeText={setSocialMediaLink}
+      />
+      <TextInput
+        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Notes (Optional)"
         placeholderTextColor="#888"
         value={notes}
         onChangeText={setNotes}
       />
+      {/* New input for Social Media Link */}
+      
       <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
         <Text style={styles.buttonText}>Upload Screenshot</Text>
       </TouchableOpacity>

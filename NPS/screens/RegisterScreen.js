@@ -20,7 +20,7 @@ const RegisterScreen = () => {
       return;
     }
     setLoading(true);
-    const response = await register(email, password, username);
+    const response = await register(email, password, username, true);
     setLoading(false);
   
     if (response.success) {

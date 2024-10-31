@@ -1,3 +1,4 @@
+// NPS/screens/ManageBookingsScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { db } from '../firebase';
@@ -43,36 +44,40 @@ const ManageBookingsScreen = () => {
     );
   }
 
+  const renderBookingItem = ({ item }) => (
+    <View style={styles.bookingItem}>
+      <View style={styles.textContainer}>
+        <Text style={styles.bookingText}>Name: {item.firstName} {item.lastName}</Text>
+        <Text style={styles.bookingText}>Booking Type: {item.paymentType}</Text>
+        <Text style={styles.bookingText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
+        <Text style={styles.bookingText}>Scheduled Date: {new Date(item.date).toLocaleString()}</Text>
+        <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          onPress={() => updateStatus(item.id, 'approved')} 
+          style={[styles.button, styles.approveButton]}
+        >
+          <Icon name="check-circle" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Approve</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => updateStatus(item.id, 'cancelled')} 
+          style={[styles.button, styles.cancelButton]}
+        >
+          <Icon name="cancel" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <FlatList
       data={bookings}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.listContainer}
-      renderItem={({ item }) => (
-        <View style={styles.bookingItem}>
-          <View style={styles.textContainer}>
-            <Text style={styles.bookingText}>Name: {item.firstName} {item.lastName}</Text>
-            <Text style={styles.bookingText}>Booking Type: {item.bookingType}</Text>
-            <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              onPress={() => updateStatus(item.id, 'approved')} 
-              style={[styles.button, styles.approveButton]}
-            >
-              <Icon name="check-circle" size={24} color="#fff" />
-              <Text style={styles.buttonText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => updateStatus(item.id, 'cancelled')} 
-              style={[styles.button, styles.cancelButton]}
-            >
-              <Icon name="cancel" size={24} color="#fff" />
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      renderItem={renderBookingItem}
     />
   );
 };

@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { lightTheme } from './Theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { db } from '../firebase'; // Import the Firestore database
+import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 const BookingScreen = ({ navigation }) => {
@@ -14,7 +14,7 @@ const BookingScreen = ({ navigation }) => {
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('SAT');
   const [notes, setNotes] = useState('');
-  const [amount, setAmount] = useState('');
+  const [socialMediaLink, setSocialMediaLink] = useState(''); // New field for social media link
   const [screenshot, setScreenshot] = useState(null);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -38,8 +38,8 @@ const BookingScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!firstName.trim() || !lastName.trim() || !amount.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields (First Name, Last Name, and Amount).');
+    if (!firstName.trim() || !lastName.trim() || !socialMediaLink.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields (First Name, Last Name, and Social Media Link).');
       return;
     }
 
@@ -48,7 +48,7 @@ const BookingScreen = ({ navigation }) => {
       lastName,
       paymentType,
       notes,
-      amount,
+      socialMediaLink, // Include social media link
       screenshot,
       date: date.toISOString(),
     };
@@ -62,8 +62,8 @@ const BookingScreen = ({ navigation }) => {
       setFirstName('');
       setLastName('');
       setPaymentType('SAT');
-      setAmount('');
       setNotes('');
+      setSocialMediaLink('');
       setScreenshot(null);
       setDate(new Date());
     } catch (error) {
@@ -97,13 +97,14 @@ const BookingScreen = ({ navigation }) => {
           style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           onValueChange={(itemValue) => setPaymentType(itemValue)}
         >
+          <Picker.Item label="Select Payment Type" value="" />
           <Picker.Item label="USMLE" value="USMLE" />
           <Picker.Item label="OET" value="OET" />
           <Picker.Item label="WES" value="WES" />
           <Picker.Item label="SOPHAS" value="SOPHAS" />
           <Picker.Item label="Duolingo English Test" value="Duolingo English Test" />
           <Picker.Item label="SAT" value="SAT" />
-          <Picker.Item label="Facebook and Instagram Boost Payments" value="Facebook Boost" />
+          <Picker.Item label="Facebook Boost" value="Facebook Boost" />
           <Picker.Item label="DHA Exam" value="DHA" />
           <Picker.Item label="PLAB Exam" value="PLAB" />
           <Picker.Item label="OTHERS" value="OTHERS" />
@@ -111,11 +112,10 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Amount"
+          placeholder="Social Media Link (e.g., Telegram, LinkedIn)"
           placeholderTextColor={lightTheme.text}
-          value={amount}
-          onChangeText={setAmount}
-          keyboardType="numeric"
+          value={socialMediaLink}
+          onChangeText={setSocialMediaLink}
         />
 
         <TouchableOpacity style={[styles.datePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowDatePicker(true)}>

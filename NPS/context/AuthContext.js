@@ -1,15 +1,22 @@
 // NPS/context/AuthContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+// Create AuthContext to manage authentication state
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
 
+  // Listen for authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -23,12 +30,20 @@ export const AuthContextProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // Fetch user data from Firestore, including admin status
   const fetchUserData = async (userId) => {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
+
       if (docSnap.exists()) {
-        setUser({ uid: userId, ...docSnap.data() });
+        const data = docSnap.data();
+        setUser({
+          uid: userId,
+          username: data.username,
+          email: data.email,
+          isAdmin: data.isAdmin || false, // Set default to false if not specified
+        });
       } else {
         console.log("No user document found for:", userId);
       }
@@ -37,37 +52,57 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  // Login function
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
     } catch (error) {
-      return { success: false, msg: error.message };
+      let msg = error.message;
+      if (msg.includes('(auth/invalid-email)')) msg = 'Invalid email format';
+      if (msg.includes('(auth/wrong-password)')) msg = 'Incorrect password';
+      if (msg.includes('(auth/user-not-found)')) msg = 'User not found';
+      return { success: false, msg };
     }
   };
 
-  const register = async (email, password, username) => {
+  // Register function with Firestore user document creation, including admin status
+  const register = async (email, password, username, isAdmin = false) => {
     try {
+      // Register user with Firebase Authentication
       const response = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', response.user.uid), { username, email });
+
+      // Create user document in Firestore
+      await setDoc(doc(db, 'users', response.user.uid), {
+        username,
+        email,
+        isAdmin,
+      });
+
       return { success: true };
     } catch (error) {
-      return { success: false, msg: error.message };
+      let msg = error.message;
+      if (msg.includes('(auth/invalid-email)')) msg = 'Invalid email format';
+      if (msg.includes('(auth/email-already-in-use)')) msg = 'Email is already registered';
+      if (msg.includes('(auth/weak-password)')) msg = 'Password should be at least 6 characters';
+      return { success: false, msg };
     }
   };
 
+  // Logout function
   const logout = async () => {
     try {
       await signOut(auth);
-      setUser(null);
+      setUser(null); // Clear user state on logout
       return { success: true };
     } catch (error) {
       return { success: false, msg: error.message };
     }
   };
 
+  // Return null if authentication state is still loading
   if (isAuthenticated === undefined) {
-    return null;
+    return null; // Or add a loading component here
   }
 
   return (
@@ -77,6 +112,7 @@ export const AuthContextProvider = ({ children }) => {
   );
 };
 
+// Custom hook to access the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

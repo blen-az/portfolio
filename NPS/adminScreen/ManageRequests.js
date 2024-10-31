@@ -44,6 +44,7 @@ const ManageRequestsScreen = () => {
       <View style={styles.textContainer}>
         <Text style={styles.requestText}>Name: {item.firstName} {item.lastName}</Text>
         <Text style={styles.requestText}>Type: {item.paymentType}</Text>
+        <Text style={styles.requestText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
         <Text style={styles.requestText}>Notes: {item.notes}</Text>
         <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
       </View>
