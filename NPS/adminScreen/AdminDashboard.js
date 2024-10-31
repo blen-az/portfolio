@@ -1,8 +1,17 @@
 // adminScreen/AdminDashboard.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../context/AuthContext'; // Import AuthContext for logout
 
 const AdminDashboard = ({ navigation }) => {
+  const { logout } = useAuth(); // Access the logout function from AuthContext
+
+  const handleLogout = async () => {
+    await logout();
+    navigation.replace('AuthNavigator'); // Navigate to login after logout
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Dashboard</Text>
@@ -11,6 +20,7 @@ const AdminDashboard = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('ManageRequests')}
       >
+        <Icon name="assignment" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>Manage Requests</Text>
       </TouchableOpacity>
 
@@ -18,6 +28,7 @@ const AdminDashboard = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('ManageBookings')}
       >
+        <Icon name="book" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>Manage Bookings</Text>
       </TouchableOpacity>
 
@@ -25,6 +36,7 @@ const AdminDashboard = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('UserManagement')}
       >
+        <Icon name="people" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>User Management</Text>
       </TouchableOpacity>
 
@@ -32,7 +44,13 @@ const AdminDashboard = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('TransactionHistory')}
       >
+        <Icon name="history" size={24} color="#fff" style={styles.icon} />
         <Text style={styles.buttonText}>Transaction History</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Icon name="logout" size={24} color="#fff" style={styles.icon} />
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -46,21 +64,37 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginBottom: 40,
   },
   button: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 25,
     width: '80%',
-    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
+    fontWeight: '600',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F44336',
+    padding: 15,
+    borderRadius: 25,
+    width: '80%',
+    justifyContent: 'center',
+    marginTop: 30,
   },
 });
 

@@ -2,17 +2,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { lightTheme } from './Theme';
-import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigation = useNavigation();
+  const { login } = useAuth();
 
-  // Handles login action, simulating a successful login response and handling UI feedback
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
@@ -20,20 +19,21 @@ const LoginScreen = () => {
 
     setLoading(true);
 
-    // Simulate API call for login (replace with actual authentication logic if needed)
-    setTimeout(() => {
+    try {
+      const response = await login(email, password);
       setLoading(false);
-      setError(null);  // Clear error on success
-      console.log('Login successful');
 
-      // Navigate to Home screen
-      navigation.replace('Home');
-    }, 1000);  // Adjust delay as needed for UI feedback
-  };
-
-  // Navigate to Register screen
-  const navigateToRegister = () => {
-    navigation.navigate('Register');
+      if (response.success) {
+        setError(null); // Clear error on success
+        console.log('Login successful');
+      } else {
+        setError(response.msg); // Set error if login failed
+      }
+    } catch (err) {
+      setLoading(false);
+      setError('An error occurred. Please try again.');
+      console.error(err);
+    }
   };
 
   return (
@@ -60,25 +60,20 @@ const LoginScreen = () => {
       />
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: lightTheme.secondary}]}
+        style={[styles.button, { backgroundColor: lightTheme.primary }]}
         onPress={handleLogin}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color={lightTheme.text} />
+          <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={[styles.buttonText, { color: lightTheme.text }]}>Login</Text>
+          <Text style={[styles.buttonText, { color: lightTheme.secondary }]}>Login</Text>
         )}
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={navigateToRegister}>
-        <Text style={[styles.registerText, { color: lightTheme.text }]}>Don’t have an account? Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-// Styles for the LoginScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -104,15 +99,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
+    color: '#fff',
   },
   error: {
     textAlign: 'center',
     marginBottom: 10,
-  },
-  registerText: {
-    textAlign: 'center',
-    marginTop: 15,
-    fontSize: 16,
   },
 });
 

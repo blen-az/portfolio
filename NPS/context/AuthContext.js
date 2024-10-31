@@ -1,4 +1,3 @@
-// NPS/context/AuthContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
@@ -38,12 +37,14 @@ export const AuthContextProvider = ({ children }) => {
 
       if (docSnap.exists()) {
         const data = docSnap.data();
+        const adminStatus = data.isAdmin || false; // Ensure it defaults to false if missing
         setUser({
           uid: userId,
           username: data.username,
           email: data.email,
-          isAdmin: data.isAdmin || false, // Set default to false if not specified
+          isAdmin: adminStatus,
         });
+        console.log("Fetched user data:", { adminStatus }); // Log to confirm admin status
       } else {
         console.log("No user document found for:", userId);
       }
@@ -100,10 +101,12 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // Return null if authentication state is still loading
+  // Display loading component while checking authentication state
   if (isAuthenticated === undefined) {
-    return null; // Or add a loading component here
+    return null; // Or a loading component here
   }
+
+  console.log("Auth state:", { isAuthenticated, user }); // Log auth state to debug
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
