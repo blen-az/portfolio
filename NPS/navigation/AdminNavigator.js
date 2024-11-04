@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import AdminDashboard from '../adminScreen/AdminDashboard';
 import ManageRequests from '../adminScreen/ManageRequests';
 import ManageBookings from '../adminScreen/ManageBookings';
-import UserManagement from '../adminScreen/UserManagement';
+import AdminChatScreen from '../adminScreen/AdminChatScreen';
 import TransactionHistory from '../adminScreen/TransactionHistory';
 
 const AdminStack = createStackNavigator();
@@ -15,10 +15,10 @@ const AdminNavigator = () => (
       component={AdminDashboard}
       options={{ headerShown: false }}
     />
-    <AdminStack.Screen name="ManageRequests" component={ManageRequests} />
-    <AdminStack.Screen name="ManageBookings" component={ManageBookings} />
-    <AdminStack.Screen name="UserManagement" component={UserManagement} />
-    <AdminStack.Screen name="TransactionHistory" component={TransactionHistory} />
+    <AdminStack.Screen name="ManageRequests" component={ManageRequests } options={{ headerShown: false }}  />
+    <AdminStack.Screen name="ManageBookings" component={ManageBookings}options={{ headerShown: false }}  />
+    <AdminStack.Screen name="AdminChatScreen" component={AdminChatScreen} options={{ headerShown: false }} />
+    <AdminStack.Screen name="TransactionHistory" component={TransactionHistory} options={{ headerShown: false }} />
   </AdminStack.Navigator>
 );
 

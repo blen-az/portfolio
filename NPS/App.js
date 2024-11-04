@@ -5,21 +5,24 @@ import { AuthContextProvider, useAuth } from './context/AuthContext';
 import AppNavigator from './navigation/AppNavigator';
 import AdminNavigator from './navigation/AdminNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
+import LoadingScreen from './screens/LoadingScreen';
 
 const AppContent = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
-  if (isAuthenticated === undefined) {
-    return null; // or a loading component
+  if (isAuthenticated === undefined || (isAuthenticated && !user))  {
+    return <LoadingScreen />;
   }
 
-  // Show AuthNavigator if the user is not authenticated
   if (!isAuthenticated) {
     return <AuthNavigator />;
   }
 
-  // Render AdminNavigator if the user is an admin, otherwise AppNavigator for regular users
-  return user?.isAdmin ? <AdminNavigator /> : <AppNavigator />;
+  return user.isAdmin ? (
+    <AdminNavigator screenOptions={{ headerRight: () => <Button title="Logout" onPress={logout} /> }} />
+  ) : (
+    <AppNavigator screenOptions={{ headerRight: () => <Button title="Logout" onPress={logout} /> }} />
+  );
 };
 
 const App = () => (

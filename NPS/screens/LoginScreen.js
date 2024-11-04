@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { lightTheme } from './Theme';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
@@ -9,6 +10,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigation = useNavigation(); // Adding useNavigation for handling navigation
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -34,6 +36,11 @@ const LoginScreen = () => {
       setError('An error occurred. Please try again.');
       console.error(err);
     }
+  };
+
+  // Navigate to Register screen
+  const navigateToRegister = () => {
+    navigation.navigate('Register'); // Navigate to Register screen
   };
 
   return (
@@ -70,6 +77,10 @@ const LoginScreen = () => {
           <Text style={[styles.buttonText, { color: lightTheme.secondary }]}>Login</Text>
         )}
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={navigateToRegister}>
+        <Text style={[styles.registerText, { color: lightTheme.text }]}>Don’t have an account? Sign Up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -104,6 +115,11 @@ const styles = StyleSheet.create({
   error: {
     textAlign: 'center',
     marginBottom: 10,
+  },
+  registerText: {
+    textAlign: 'center',
+    marginTop: 15,
+    fontSize: 16,
   },
 });
 

@@ -20,7 +20,7 @@ const RegisterScreen = () => {
       return;
     }
     setLoading(true);
-    const response = await register(email, password, username, true);
+    const response = await register(email, password, username); // No isAdmin passed here
     setLoading(false);
   
     if (response.success) {
@@ -66,7 +66,7 @@ const RegisterScreen = () => {
         {loading ? (
           <ActivityIndicator size="small" color={lightTheme.text} />
         ) : (
-          <Text style={[styles.buttonText, { color: lightTheme.secondary}]}>Sign Up</Text>
+          <Text style={[styles.buttonText, { color: lightTheme.secondary }]}>Sign Up</Text>
         )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>

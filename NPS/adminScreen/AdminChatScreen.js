@@ -1,9 +1,10 @@
+// screens/AdminChatScreen.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { db } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, getDoc, getDocs, doc } from 'firebase/firestore';
+import { fetchActiveUsers } from '../services/chatService'; // Ensure correct path
 
 const AdminChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
@@ -13,41 +14,19 @@ const AdminChatScreen = ({ navigation }) => {
 
   // Fetch users with active chats and retrieve their usernames
   useEffect(() => {
-    const fetchActiveUsers = async () => {
-      const uniqueUserIds = new Set();
-
-      // Get unique sender IDs from messages addressed to the admin
-      const messagesQuery = query(collection(db, 'messages'), where('recipientId', '==', 'admin'));
-      const messageSnapshot = await getDocs(messagesQuery);
-
-      messageSnapshot.forEach((doc) => {
-        const data = doc.data();
-        uniqueUserIds.add(data.senderId);
-      });
-
-      // Fetch usernames from the 'users' collection for each unique user ID
-      const userPromises = Array.from(uniqueUserIds).map(async (userId) => {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', userId));
-          return userDoc.exists()
-            ? { uid: userId, username: userDoc.data().username || 'Unknown' }
-            : { uid: userId, username: 'Unknown' };
-        } catch (error) {
-          console.error(`Error fetching username for user ID ${userId}:`, error);
-          return { uid: userId, username: 'Error loading' };
-        }
-      });
-
-      const usersWithUsernames = await Promise.all(userPromises);
-      setUsers(usersWithUsernames);
+    const loadActiveUsers = async () => {
+      const usersList = await fetchActiveUsers();
+      setUsers(usersList);
     };
 
-    fetchActiveUsers();
+    loadActiveUsers();
   }, []);
 
   // Fetch messages for the selected user
   useEffect(() => {
     if (activeUser) {
+      // Use your fetchMessages function here to fetch messages for the activeUser
+      // Make sure it is ordered by most recent messages first
       const messagesQuery = query(
         collection(db, 'messages'),
         where('senderId', 'in', [activeUser.uid, 'admin']),
@@ -60,7 +39,7 @@ const AdminChatScreen = ({ navigation }) => {
           id: doc.id,
           ...doc.data(),
         }));
-        setMessages(fetchedMessages); // Messages now sorted by most recent
+        setMessages(fetchedMessages);
       });
       return unsubscribe;
     }

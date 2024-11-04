@@ -1,16 +1,23 @@
-// NPS/screens/InfoScreen.js
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { lightTheme } from "./Theme";
 
 const theme = lightTheme;
 
-const InfoScreen = () => {
+const InfoScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {/* Header with Back Button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={28} color={theme.text} />
+        </TouchableOpacity>
         <Text style={[styles.title, { color: theme.text }]}>Information</Text>
+      </View>
+      
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={[styles.infoContainer, { backgroundColor: theme.secondary }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Common Payments:</Text>
 
@@ -62,6 +69,8 @@ const InfoScreen = () => {
           <Text style={[styles.text, { color: theme.text }]}>PLAB 2: £981</Text>
         </View>
       </ScrollView>
+
+      
     </SafeAreaView>
   );
 };
@@ -70,23 +79,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+  },
   scrollContainer: {
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
+    flex: 1,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
   },
   subTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
     marginBottom: 5,
   },
@@ -98,6 +112,31 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 15,
     marginBottom: 5,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+  },
+  footerItem: {
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 12,
+    marginTop: 5,
+  },
+  activeFooterItem: {
+    elevation: 5,
+    shadowColor: "#007aff",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  activeIcon: {
+    transform: [{ scale: 1.2 }],
   },
 });
 

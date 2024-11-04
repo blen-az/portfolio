@@ -1,24 +1,34 @@
 // NPS/screens/LoadingScreen.js
 import React from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { lightTheme } from './Theme';
 
-const LoadingScreen = () => (
-  <View style={styles.container}>
-    <ActivityIndicator size="large" color="#6200ea" />
-    <Text style={styles.loadingText}>Loading...</Text>
-  </View>
-);
+const LoadingScreen = () => {
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={lightTheme.primary} />
+      <Text style={styles.loadingText}>Loading...</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: lightTheme.background,
+  },
+  appName: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: lightTheme.primary,
+    marginBottom: 20,
   },
   loadingText: {
-    marginTop: 10,
     fontSize: 16,
-    color: '#6200ea',
+    color: lightTheme.text,
+    marginTop: 10,
   },
 });
 

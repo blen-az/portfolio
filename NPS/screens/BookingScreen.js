@@ -1,9 +1,9 @@
-// NPS/screens/BookingScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../firebase';
@@ -14,7 +14,7 @@ const BookingScreen = ({ navigation }) => {
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('SAT');
   const [notes, setNotes] = useState('');
-  const [socialMediaLink, setSocialMediaLink] = useState(''); // New field for social media link
+  const [socialMediaLink, setSocialMediaLink] = useState('');
   const [screenshot, setScreenshot] = useState(null);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -48,7 +48,7 @@ const BookingScreen = ({ navigation }) => {
       lastName,
       paymentType,
       notes,
-      socialMediaLink, // Include social media link
+      socialMediaLink,
       screenshot,
       date: date.toISOString(),
     };
@@ -58,7 +58,6 @@ const BookingScreen = ({ navigation }) => {
       Alert.alert('Success', 'Booking Scheduled Successfully!');
       console.log("Document written with ID: ", docRef.id);
 
-      // Reset form after successful submission
       setFirstName('');
       setLastName('');
       setPaymentType('SAT');
@@ -149,7 +148,34 @@ const BookingScreen = ({ navigation }) => {
         <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit Booking</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+        <View style={[styles.footer, { backgroundColor: lightTheme.background }]}>
+          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={[styles.footerItem, styles.activeFooterItem]}>
+            <Icon name="home" size={34} color={lightTheme.text} />
+            <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={[styles.footerItem, styles.activeFooterItem]}>
+            <Icon name="event-note" size={45} color={lightTheme.text} />
+            <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Booking</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
+            <Icon name="payment" size={34} color={lightTheme.text} />
+            <Text style={[styles.footerText, { color: lightTheme.text }]}>Request</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
+            <Icon name="chat" size={34} color={lightTheme.text} />
+            <Text style={[styles.footerText, { color: lightTheme.text }]}>Chat</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
+            <Icon name="info" size={34} color={lightTheme.text} />
+            <Text style={[styles.footerText, { color: lightTheme.text }]}>Info</Text>
+          </TouchableOpacity>
+        </View>
+
     </SafeAreaView>
   );
 };
@@ -217,6 +243,31 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+  },
+  footerItem: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    marginTop: 5,
+  },
+  activeFooterItem: {
+    elevation: 5,
+    shadowColor: '#007aff',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  activeIcon: {
+    transform: [{ scale: 1.2 }],
   },
 });
 

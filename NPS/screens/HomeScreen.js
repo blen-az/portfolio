@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme, Animated, ImageBackground, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, ImageBackground, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { lightTheme } from './Theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -9,7 +9,6 @@ const HomeScreen = ({ navigation }) => {
   const theme = lightTheme;
   const { logout } = useContext(AuthContext);
 
-  // Animation for button press
   const scaleAnim = new Animated.Value(1);
   const opacityAnim = new Animated.Value(0.6);
 
@@ -39,9 +38,9 @@ const HomeScreen = ({ navigation }) => {
 
   const handleLogout = async () => {
     try {
-      await logout(); // Logout function in AuthContext
+      await logout(); 
       Alert.alert('Logout', 'You have been logged out successfully.');
-      navigation.replace('Login'); // Ensure that 'Login' is the correct screen name
+      navigation.replace('Login'); 
     } catch (error) {
       Alert.alert('Error', 'Failed to log out. Please try again.');
     }
@@ -53,7 +52,6 @@ const HomeScreen = ({ navigation }) => {
         source={require('../assets/BG8.jpg')}
         style={styles.backgroundImage}
       >
-        {/* Header */}
         <View style={[styles.header, { backgroundColor: theme.background }]}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Icon name="menu" size={34} color={theme.text} />
@@ -64,7 +62,6 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Middle section */}
         <View style={styles.middleSection}>
           <View style={styles.buttonRow}>
             <TouchableOpacity 
@@ -115,21 +112,30 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Footer */}
         <View style={[styles.footer, { backgroundColor: theme.background }]}>
-          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
-            <Icon name="home" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Home</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={[styles.footerItem, styles.activeFooterItem]}>
+            <Icon name="home" size={45}  style={styles.activeIcon} color={theme.text}/>
+            <Text style={[styles.footerText, { color: theme.text, fontWeight: 'bold' }]}>Home</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Transactions')} style={styles.footerItem}>
-            <Icon name="receipt" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Transactions</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
+            <Icon name="schedule" size={34} color={theme.text} />
+            <Text style={[styles.footerText, { color: theme.text }]}>Booking</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
-            <Icon name="person" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Profile</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
+            <Icon name="payment" size={34} color={theme.text} />
+            <Text style={[styles.footerText, { color: theme.text }]}>Request</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
+            <Icon name="chat" size={34} color={theme.text} />
+            <Text style={[styles.footerText, { color: theme.text }]}>Chat</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
+            <Icon name="info" size={34} color={theme.text} />
+            <Text style={[styles.footerText, { color: theme.text }]}>Info</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -204,6 +210,16 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     marginTop: 5,
+  },
+  activeFooterItem: {
+    elevation: 5,
+    shadowColor: '#007aff',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  activeIcon: {
+    transform: [{ scale: 1.2 }],
   },
 });
 

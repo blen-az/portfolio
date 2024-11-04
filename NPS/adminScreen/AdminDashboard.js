@@ -34,10 +34,10 @@ const AdminDashboard = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('UserManagement')}
+        onPress={() => navigation.navigate('AdminChatScreen')}
       >
         <Icon name="people" size={24} color="#fff" style={styles.icon} />
-        <Text style={styles.buttonText}>User Management</Text>
+        <Text style={styles.buttonText}>Chat</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

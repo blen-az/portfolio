@@ -1,3 +1,4 @@
+// context/AuthContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
@@ -8,19 +9,21 @@ import {
 import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-// Create AuthContext to manage authentication state
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
 
-  // Listen for authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setIsAuthenticated(true);
-        await fetchUserData(firebaseUser.uid); // Fetch user data on login
+        const userData = await fetchUserData(firebaseUser.uid);
+        if (!userData) {
+          await logout();
+          alert('Your account data was not found. Please sign up again.');
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -29,31 +32,28 @@ export const AuthContextProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  // Fetch user data from Firestore, including admin status
   const fetchUserData = async (userId) => {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const adminStatus = data.isAdmin || false; // Ensure it defaults to false if missing
         setUser({
           uid: userId,
           username: data.username,
           email: data.email,
-          isAdmin: adminStatus,
+          isAdmin: data.isAdmin || false,
         });
-        console.log("Fetched user data:", { adminStatus }); // Log to confirm admin status
+        return data;
       } else {
-        console.log("No user document found for:", userId);
+        return null;
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+      return null;
     }
   };
 
-  // Login function
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -67,19 +67,10 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // Register function with Firestore user document creation, including admin status
-  const register = async (email, password, username, isAdmin = false) => {
+  const register = async (email, password, username) => {
     try {
-      // Register user with Firebase Authentication
       const response = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', response.user.uid), {
-        username,
-        email,
-        isAdmin,
-      });
-
+      await setDoc(doc(db, 'users', response.user.uid), { username, email });
       return { success: true };
     } catch (error) {
       let msg = error.message;
@@ -90,23 +81,16 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = async () => {
     try {
       await signOut(auth);
-      setUser(null); // Clear user state on logout
+      setUser(null);
+      setIsAuthenticated(false);
       return { success: true };
     } catch (error) {
       return { success: false, msg: error.message };
     }
   };
-
-  // Display loading component while checking authentication state
-  if (isAuthenticated === undefined) {
-    return null; // Or a loading component here
-  }
-
-  console.log("Auth state:", { isAuthenticated, user }); // Log auth state to debug
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
@@ -115,7 +99,6 @@ export const AuthContextProvider = ({ children }) => {
   );
 };
 
-// Custom hook to access the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

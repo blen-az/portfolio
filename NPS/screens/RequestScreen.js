@@ -1,18 +1,19 @@
-// NPS/screens/RequestScreen.js
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
 import { saveRequest } from '../services/requestService';
 import { AuthContext } from '../context/AuthContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const RequestScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('');
   const [notes, setNotes] = useState('');
-  const [socialMediaLink, setSocialMediaLink] = useState(''); // New state for social media link
+  const [socialMediaLink, setSocialMediaLink] = useState('');
   const [screenshot, setScreenshot] = useState(null);
   const { user } = useContext(AuthContext);
 
@@ -43,7 +44,7 @@ const RequestScreen = ({ navigation }) => {
       lastName,
       paymentType,
       notes,
-      socialMediaLink, // Include social media link in request details
+      socialMediaLink,
       screenshot,
       userId: user.uid,
       timestamp: new Date().toISOString(),
@@ -68,70 +69,105 @@ const RequestScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
-      <Text style={[styles.title, { color: lightTheme.text }]}>Submit a Payment Request</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: lightTheme.background }]}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      <TextInput
-        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-        placeholder="First Name"
-        placeholderTextColor="#888"
-        value={firstName}
-        onChangeText={setFirstName}
-      />
-      <TextInput
-        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-        placeholder="Last Name"
-        placeholderTextColor="#888"
-        value={lastName}
-        onChangeText={setLastName}
-      />
-      <Picker
-        selectedValue={paymentType}
-        style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-        onValueChange={(itemValue) => setPaymentType(itemValue)}
-      >
-        <Picker.Item label="Select Payment Type" value="" />
-        <Picker.Item label="USMLE" value="USMLE" />
-        <Picker.Item label="OET" value="OET" />
-        <Picker.Item label="WES" value="WES" />
-        <Picker.Item label="SOPHAS" value="SOPHAS" />
-        <Picker.Item label="Duolingo English Test" value="Duolingo" />
-        <Picker.Item label="SAT" value="SAT" />
-        <Picker.Item label="Facebook and Instagram Boost Payments" value="Facebook Boost" />
-        <Picker.Item label="DHA Exam" value="DHA" />
-        <Picker.Item label="PLAB Exam" value="PLAB" />
-        <Picker.Item label="OTHERS" value="OTHERS" />
-      </Picker>
-      <TextInput
-        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-        placeholder="Social Media Link (Optional)"
-        placeholderTextColor="#888"
-        value={socialMediaLink}
-        onChangeText={setSocialMediaLink}
-      />
-      <TextInput
-        style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-        placeholder="Notes (Optional)"
-        placeholderTextColor="#888"
-        value={notes}
-        onChangeText={setNotes}
-      />
-      {/* New input for Social Media Link */}
-      
-      <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
-        <Text style={styles.buttonText}>Upload Screenshot</Text>
-      </TouchableOpacity>
-      {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
-      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit Request</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={[styles.title, { color: lightTheme.text }]}>Submit a Payment Request</Text>
+
+        <TextInput
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          placeholder="First Name"
+          placeholderTextColor="#888"
+          value={firstName}
+          onChangeText={setFirstName}
+        />
+        <TextInput
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          placeholder="Last Name"
+          placeholderTextColor="#888"
+          value={lastName}
+          onChangeText={setLastName}
+        />
+        
+        <Picker
+          selectedValue={paymentType}
+          style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          onValueChange={(itemValue) => setPaymentType(itemValue)}
+        >
+          <Picker.Item label="Select Payment Type" value="" />
+          <Picker.Item label="USMLE" value="USMLE" />
+          <Picker.Item label="OET" value="OET" />
+          <Picker.Item label="WES" value="WES" />
+          <Picker.Item label="SOPHAS" value="SOPHAS" />
+          <Picker.Item label="Duolingo English Test" value="Duolingo" />
+          <Picker.Item label="SAT" value="SAT" />
+          <Picker.Item label="Facebook and Instagram Boost Payments" value="Facebook Boost" />
+          <Picker.Item label="DHA Exam" value="DHA" />
+          <Picker.Item label="PLAB Exam" value="PLAB" />
+          <Picker.Item label="OTHERS" value="OTHERS" />
+        </Picker>
+
+        <TextInput
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          placeholder="Social Media Link"
+          placeholderTextColor="#888"
+          value={socialMediaLink}
+          onChangeText={setSocialMediaLink}
+        />
+        <TextInput
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          placeholder="Notes (Optional)"
+          placeholderTextColor="#888"
+          value={notes}
+          onChangeText={setNotes}
+        />
+        
+        <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
+          <Text style={styles.buttonText}>Upload Screenshot</Text>
+        </TouchableOpacity>
+        {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
+        
+        <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Submit Request</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <View style={[styles.footer, { backgroundColor: lightTheme.background }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
+          <Icon name="home" size={34} color={lightTheme.text} />
+          <Text style={styles.footerText}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
+          <Icon name="schedule" size={34} color={lightTheme.text} />
+          <Text style={styles.footerText}>Booking</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Request')} style={[styles.footerItem, styles.activeFooterItem]}>
+          <Icon name="payment" size={45} style={styles.activeIcon} color={lightTheme.text} />
+          <Text style={[styles.footerText, { fontWeight: 'bold', color: lightTheme.text }]}>Request</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
+          <Icon name="chat" size={34} color={lightTheme.text} />
+          <Text style={styles.footerText}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
+          <Icon name="info" size={34} color={lightTheme.text} />
+          <Text style={styles.footerText}>Info</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -174,6 +210,31 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+  },
+  footerItem: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    marginTop: 5,
+  },
+  activeFooterItem: {
+    elevation: 5,
+    shadowColor: '#007aff',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  activeIcon: {
+    transform: [{ scale: 1.2 }],
   },
 });
 
