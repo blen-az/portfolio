@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "NPS",
-    "slug": "NPS",
+    "name": "SurePay",
+    "slug": "surepay",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Icon.webp",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -18,10 +18,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.blen_az.surepay"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fb76700c-10d5-4cf3-a72a-b6c7a8abc8d4"
+      }
     }
   }
 }

@@ -18,12 +18,22 @@ const RegisterScreen = () => {
       setError('All fields are required');
       return;
     }
+
     setLoading(true);
-    const response = await register(email, password, username); 
-  
+    const response = await register(email, password, username);
+    setLoading(false);
+
     if (response.success) {
-      Alert.alert('Success', 'Registration successful!');
-      navigation.replace('Home');
+      Alert.alert(
+        'Registration Successful',
+        'A verification email has been sent to your email address. Please verify your email to activate your account.',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login'), // Redirect to Login screen
+          },
+        ]
+      );
     } else {
       setError(response.msg || 'Registration failed');
     }
@@ -64,7 +74,7 @@ const RegisterScreen = () => {
         {loading ? (
           <ActivityIndicator size="small" color={lightTheme.text} />
         ) : (
-          <Text style={[styles.buttonText, { color: lightTheme.secondary }]}>Sign Up</Text>
+          <Text style={styles.buttonText}>Sign Up</Text>
         )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>

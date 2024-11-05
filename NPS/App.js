@@ -20,24 +20,23 @@ const AppContent = () => {
     return () => clearTimeout(timer); // Clear timer on unmount
   }, []);
 
+  // Show StartUploadingScreen initially if in uploading state
   if (isUploading) {
-    return <StartUploadingScreen />; // Show StartUploadingScreen initially
+    return <StartUploadingScreen />;
   }
 
+  // Show LoadingScreen while determining auth state
   if (isAuthenticated === undefined || (isAuthenticated && !user)) {
-    return <LoadingScreen />; // Show LoadingScreen while determining auth state
+    return <LoadingScreen />;
   }
 
+  // If not authenticated, show the login flow
   if (!isAuthenticated) {
-    return <AuthNavigator />; // If not authenticated, show the login flow
+    return <AuthNavigator />;
   }
 
   // Return the main navigation based on user role
-  return user.isAdmin ? (
-    <AdminNavigator screenOptions={{ headerRight: () => <Button title="Logout" onPress={logout} /> }} />
-  ) : (
-    <AppNavigator screenOptions={{ headerRight: () => <Button title="Logout" onPress={logout} /> }} />
-  );
+  return user.isAdmin ? <AdminNavigator /> : <AppNavigator />;
 };
 
 const App = () => (

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, ImageBackground, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { lightTheme } from './Theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { AuthContext } from '../context/AuthContext';
@@ -10,7 +10,7 @@ const HomeScreen = ({ navigation }) => {
   const { logout } = useContext(AuthContext);
 
   const scaleAnim = new Animated.Value(1);
-  const opacityAnim = new Animated.Value(0.6);
+  const opacityAnim = new Animated.Value(0.8);
 
   useEffect(() => {
     Animated.timing(opacityAnim, {
@@ -38,9 +38,9 @@ const HomeScreen = ({ navigation }) => {
 
   const handleLogout = async () => {
     try {
-      await logout(); 
+      await logout();
       Alert.alert('Logout', 'You have been logged out successfully.');
-      navigation.replace('Login'); 
+      navigation.replace('Login');
     } catch (error) {
       Alert.alert('Error', 'Failed to log out. Please try again.');
     }
@@ -52,8 +52,8 @@ const HomeScreen = ({ navigation }) => {
         source={require('../assets/BG8.jpg')}
         style={styles.backgroundImage}
       >
-        <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <View style={{ width: 34 }} />
+        <View style={[styles.header, {backgroundColor: theme.background}]}>
+          <View style={{ width: 34 }} />
           <Text style={[styles.headerTitle, { color: theme.text }]}>SurePay</Text>
           <TouchableOpacity onPress={handleLogout}>
             <Icon name="logout" size={34} color={theme.text} />
@@ -110,25 +110,18 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={[styles.footer, { backgroundColor: theme.background }]}>
-          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={[styles.footerItem, styles.activeFooterItem]}>
-            <Icon name="home" size={45}  style={styles.activeIcon} color={theme.text}/>
-            {/* <Text style={[styles.footerText, { color: theme.text, fontWeight: 'bold' }]}>Home</Text> */}
+        <View style={[styles.footer, {backgroundColor: theme.background}]}>
+          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
+            <Icon name="home" size={45} color={theme.text} />
           </TouchableOpacity>
-
           <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
             <Icon name="schedule" size={34} color={theme.text} />
-            {/* <Text style={[styles.footerText, { color: theme.text }]}>Booking</Text> */}
           </TouchableOpacity>
-
           <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
             <Icon name="payment" size={34} color={theme.text} />
-            {/* <Text style={[styles.footerText, { color: theme.text }]}>Request</Text> */}
           </TouchableOpacity>
-
           <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
             <Icon name="person" size={34} color={theme.text} />
-            {/* <Text style={[styles.footerText, { color: theme.text }]}>Profile</Text> */}
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -152,8 +145,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   headerTitle: {
     fontSize: 24,
@@ -168,20 +159,13 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    marginVertical: 35,
+    
   },
   button: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 22,
-    borderRadius: 10,
-    marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
   },
   buttonText: {
     fontSize: 15,
@@ -194,25 +178,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     paddingVertical: 15,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
   },
   footerItem: {
     alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    marginTop: 5,
-  },
-  activeFooterItem: {
-    elevation: 5,
-    shadowColor: '#007aff',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  activeIcon: {
-    transform: [{ scale: 1.2 }],
   },
 });
 

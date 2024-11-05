@@ -5,7 +5,6 @@ import ManageRequests from '../adminScreen/ManageRequests';
 import ManageBookings from '../adminScreen/ManageBookings';
 import AdminChatScreen from '../adminScreen/AdminChatScreen';
 
-
 const AdminStack = createStackNavigator();
 
 const AdminNavigator = () => (
@@ -15,10 +14,9 @@ const AdminNavigator = () => (
       component={AdminDashboard}
       options={{ headerShown: false }}
     />
-    <AdminStack.Screen name="ManageRequests" component={ManageRequests } options={{ headerShown: false }}  />
-    <AdminStack.Screen name="ManageBookings" component={ManageBookings}options={{ headerShown: false }}  />
+    <AdminStack.Screen name="ManageRequests" component={ManageRequests} options={{ headerShown: false }} />
+    <AdminStack.Screen name="ManageBookings" component={ManageBookings} options={{ headerShown: false }} />
     <AdminStack.Screen name="AdminChatScreen" component={AdminChatScreen} options={{ headerShown: false }} />
-
   </AdminStack.Navigator>
 );
 

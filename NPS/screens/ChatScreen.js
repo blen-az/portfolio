@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { fetchMessages, sendMessage } from '../services/chatService';
 import { AuthContext } from '../context/AuthContext';
-import { lightTheme } from '../screens/Theme'; // Import the theme
+import { lightTheme } from '../screens/Theme'; 
 
 const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const { user } = useContext(AuthContext);
-  const userId = user?.uid || 'testUser'; // Replace 'testUser' with actual user ID if testing
+  const userId = user?.uid || 'testUser';
 
   useEffect(() => {
     const unsubscribe = fetchMessages(userId, setMessages);

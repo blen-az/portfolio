@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { lightTheme } from './Theme';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +10,7 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigation = useNavigation();
-  const { login } = useAuth();
+  const { login, emailVerified, resendVerificationEmail } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -19,35 +19,38 @@ const LoginScreen = () => {
     }
 
     setLoading(true);
+    const response = await login(email, password);
+    setLoading(false);
 
-    try {
-      const response = await login(email, password);
-      setLoading(false);
-
-      if (response.success) {
-        setError(null);
-        console.log('Login successful');
+    if (response.success) {
+      setError(null);
+      console.log('Login successful');
+    } else {
+      if (!emailVerified) {
+        Alert.alert(
+          'Email Verification Required',
+          response.msg,
+          [
+            { text: 'Resend Verification Email', onPress: resendVerificationEmail },
+            { text: 'OK' },
+          ]
+        );
       } else {
-        setError(response.msg); 
+        setError(response.msg);
       }
-    } catch (err) {
-      setLoading(false);
-      setError('Invalid credentials. Please try again.');
-      console.error(err);
     }
   };
 
-
   const navigateToRegister = () => {
-    navigation.navigate('Register'); 
+    navigation.navigate('Register');
   };
 
   return (
     <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
       <Text style={[styles.title, { color: lightTheme.text }]}>Login</Text>
-      
+
       {error && <Text style={[styles.error, { color: 'red' }]}>{error}</Text>}
-      
+
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Email"
