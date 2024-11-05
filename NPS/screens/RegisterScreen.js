@@ -1,4 +1,3 @@
-// NPS/screens/RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { lightTheme } from './Theme';
@@ -20,12 +19,11 @@ const RegisterScreen = () => {
       return;
     }
     setLoading(true);
-    const response = await register(email, password, username); // No isAdmin passed here
-    setLoading(false);
+    const response = await register(email, password, username); 
   
     if (response.success) {
       Alert.alert('Success', 'Registration successful!');
-      navigation.replace('Home'); // Navigate to Home
+      navigation.replace('Home');
     } else {
       setError(response.msg || 'Registration failed');
     }

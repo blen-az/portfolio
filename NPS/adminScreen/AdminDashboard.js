@@ -1,15 +1,14 @@
-// adminScreen/AdminDashboard.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useAuth } from '../context/AuthContext'; // Import AuthContext for logout
+import { useAuth } from '../context/AuthContext'; 
 
 const AdminDashboard = ({ navigation }) => {
-  const { logout } = useAuth(); // Access the logout function from AuthContext
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    navigation.replace('AuthNavigator'); // Navigate to login after logout
+    navigation.replace('AuthNavigator');
   };
 
   return (
@@ -40,13 +39,7 @@ const AdminDashboard = ({ navigation }) => {
         <Text style={styles.buttonText}>Chat</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('TransactionHistory')}
-      >
-        <Icon name="history" size={24} color="#fff" style={styles.icon} />
-        <Text style={styles.buttonText}>Transaction History</Text>
-      </TouchableOpacity>
+
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Icon name="logout" size={24} color="#fff" style={styles.icon} />

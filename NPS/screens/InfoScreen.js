@@ -9,7 +9,6 @@ const theme = lightTheme;
 const InfoScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={28} color={theme.text} />

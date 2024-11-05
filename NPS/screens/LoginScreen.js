@@ -1,4 +1,3 @@
-// NPS/screens/LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { lightTheme } from './Theme';
@@ -10,7 +9,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigation = useNavigation(); // Adding useNavigation for handling navigation
+  const navigation = useNavigation();
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -26,21 +25,21 @@ const LoginScreen = () => {
       setLoading(false);
 
       if (response.success) {
-        setError(null); // Clear error on success
+        setError(null);
         console.log('Login successful');
       } else {
-        setError(response.msg); // Set error if login failed
+        setError(response.msg); 
       }
     } catch (err) {
       setLoading(false);
-      setError('An error occurred. Please try again.');
+      setError('Invalid credentials. Please try again.');
       console.error(err);
     }
   };
 
-  // Navigate to Register screen
+
   const navigateToRegister = () => {
-    navigation.navigate('Register'); // Navigate to Register screen
+    navigation.navigate('Register'); 
   };
 
   return (

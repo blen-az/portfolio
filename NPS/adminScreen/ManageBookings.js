@@ -1,4 +1,4 @@
-// NPS/screens/ManageBookingsScreen.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { db } from '../firebase';

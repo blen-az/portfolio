@@ -1,14 +1,13 @@
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 
-// Function to save a request in Firestore
 export const saveRequest = async (userId, requestDetails) => {
   try {
     const docRef = await addDoc(collection(db, 'requests'), {
       userId,
       ...requestDetails,
-      status: 'Pending', // Default status for a new request
-      timestamp: new Date().toISOString(), // Adding a timestamp for record-keeping
+      status: 'Pending', 
+      timestamp: new Date().toISOString(), 
     });
     console.log("Document written with ID: ", docRef.id);
     return { success: true, id: docRef.id };
@@ -18,7 +17,7 @@ export const saveRequest = async (userId, requestDetails) => {
   }
 };
 
-// Function to fetch all requests from Firestore
+
 export const fetchRequests = async () => {
   try {
     const requests = [];
@@ -33,7 +32,6 @@ export const fetchRequests = async () => {
   }
 };
 
-// Function to update the status of a request in Firestore
 export const updateRequestStatus = async (requestId, newStatus) => {
   try {
     const requestRef = doc(db, 'requests', requestId);

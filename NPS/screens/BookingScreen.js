@@ -152,27 +152,22 @@ const BookingScreen = ({ navigation }) => {
         <View style={[styles.footer, { backgroundColor: lightTheme.background }]}>
           <TouchableOpacity onPress={() => navigation.navigate('Home')} style={[styles.footerItem, styles.activeFooterItem]}>
             <Icon name="home" size={34} color={lightTheme.text} />
-            <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Home</Text>
+            {/* <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Home</Text> */}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={[styles.footerItem, styles.activeFooterItem]}>
-            <Icon name="event-note" size={45} color={lightTheme.text} />
-            <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Booking</Text>
+            <Icon name="schedule" size={45} color={lightTheme.text} />
+            {/* <Text style={[styles.footerText, { color: lightTheme.text, fontWeight: 'bold' }]}>Booking</Text> */}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
             <Icon name="payment" size={34} color={lightTheme.text} />
-            <Text style={[styles.footerText, { color: lightTheme.text }]}>Request</Text>
+            {/* <Text style={[styles.footerText, { color: lightTheme.text }]}>Request</Text> */}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
-            <Icon name="chat" size={34} color={lightTheme.text} />
-            <Text style={[styles.footerText, { color: lightTheme.text }]}>Chat</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
-            <Icon name="info" size={34} color={lightTheme.text} />
-            <Text style={[styles.footerText, { color: lightTheme.text }]}>Info</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
+            <Icon name="person" size={34} color={lightTheme.text} />
+            {/* <Text style={[styles.footerText, { color:lightTheme.text }]}>Profile</Text> */}
           </TouchableOpacity>
         </View>
 

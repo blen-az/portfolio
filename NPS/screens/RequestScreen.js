@@ -135,28 +135,23 @@ const RequestScreen = ({ navigation }) => {
       <View style={[styles.footer, { backgroundColor: lightTheme.background }]}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
           <Icon name="home" size={34} color={lightTheme.text} />
-          <Text style={styles.footerText}>Home</Text>
+          {/* <Text style={styles.footerText}>Home</Text> */}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
           <Icon name="schedule" size={34} color={lightTheme.text} />
-          <Text style={styles.footerText}>Booking</Text>
+          {/* <Text style={styles.footerText}>Booking</Text> */}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Request')} style={[styles.footerItem, styles.activeFooterItem]}>
           <Icon name="payment" size={45} style={styles.activeIcon} color={lightTheme.text} />
-          <Text style={[styles.footerText, { fontWeight: 'bold', color: lightTheme.text }]}>Request</Text>
+          {/* <Text style={[styles.footerText, { fontWeight: 'bold', color: lightTheme.text }]}>Request</Text> */}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
-          <Icon name="chat" size={34} color={lightTheme.text} />
-          <Text style={styles.footerText}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
-          <Icon name="info" size={34} color={lightTheme.text} />
-          <Text style={styles.footerText}>Info</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
+            <Icon name="person" size={34} color={lightTheme.text} />
+            {/* <Text style={[styles.footerText, { color: lightTheme.text }]}>Profile</Text> */}
+          </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

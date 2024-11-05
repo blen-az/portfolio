@@ -1,4 +1,4 @@
-// screens/ProfileScreen.js
+
 import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';

@@ -1,10 +1,8 @@
-// screens/AdminChatScreen.js
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { fetchActiveUsers } from '../services/chatService'; // Ensure correct path
+import { fetchActiveUsers, fetchMessages, sendMessage } from '../services/adminChatService';
 
 const AdminChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
@@ -12,49 +10,28 @@ const AdminChatScreen = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
 
-  // Fetch users with active chats and retrieve their usernames
   useEffect(() => {
     const loadActiveUsers = async () => {
       const usersList = await fetchActiveUsers();
       setUsers(usersList);
     };
-
     loadActiveUsers();
   }, []);
 
-  // Fetch messages for the selected user
   useEffect(() => {
     if (activeUser) {
-      // Use your fetchMessages function here to fetch messages for the activeUser
-      // Make sure it is ordered by most recent messages first
-      const messagesQuery = query(
-        collection(db, 'messages'),
-        where('senderId', 'in', [activeUser.uid, 'admin']),
-        where('recipientId', 'in', [activeUser.uid, 'admin']),
-        orderBy('timestamp', 'desc') // Most recent messages first
-      );
-
-      const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-        const fetchedMessages = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setMessages(fetchedMessages);
-      });
+      const unsubscribe = fetchMessages(activeUser.uid, setMessages);
       return unsubscribe;
     }
   }, [activeUser]);
 
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (message.trim()) {
-      await addDoc(collection(db, 'messages'), {
-        senderId: 'admin',
-        recipientId: activeUser.uid,
-        message,
-        timestamp: new Date(),
-      });
-      setMessage('');
-      Keyboard.dismiss();
+      const success = await sendMessage(activeUser.uid, message);
+      if (success) {
+        setMessage('');
+        Keyboard.dismiss();
+      }
     }
   };
 
@@ -96,7 +73,7 @@ const AdminChatScreen = ({ navigation }) => {
               </View>
             )}
             contentContainerStyle={styles.messageContainer}
-            inverted // Inverts the list to keep the latest messages at the top
+            inverted
           />
           <View style={styles.inputContainer}>
             <TextInput
@@ -104,9 +81,9 @@ const AdminChatScreen = ({ navigation }) => {
               placeholder="Type a message..."
               value={message}
               onChangeText={setMessage}
-              onSubmitEditing={sendMessage}
+              onSubmitEditing={handleSendMessage}
             />
-            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
               <Text style={styles.sendButtonText}>Send</Text>
             </TouchableOpacity>
           </View>

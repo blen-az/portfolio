@@ -1,4 +1,4 @@
-// NPS/screens/RequestManagementScreen.js
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { fetchRequests, updateRequestStatus } from '../services/requestService';

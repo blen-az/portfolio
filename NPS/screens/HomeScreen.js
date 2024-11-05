@@ -53,10 +53,8 @@ const HomeScreen = ({ navigation }) => {
         style={styles.backgroundImage}
       >
         <View style={[styles.header, { backgroundColor: theme.background }]}>
-          <TouchableOpacity onPress={() => navigation.openDrawer()}>
-            <Icon name="menu" size={34} color={theme.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>NPS</Text>
+        <View style={{ width: 34 }} />
+          <Text style={[styles.headerTitle, { color: theme.text }]}>SurePay</Text>
           <TouchableOpacity onPress={handleLogout}>
             <Icon name="logout" size={34} color={theme.text} />
           </TouchableOpacity>
@@ -70,7 +68,7 @@ const HomeScreen = ({ navigation }) => {
               onPressOut={handlePressOut}
               onPress={() => navigation.navigate('Request')}>
               <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center', opacity: opacityAnim }}>
-                <Icon name="payment" size={48} color={theme.text} />
+                <Icon name="payment" size={55} color={theme.text} />
                 <Text style={[styles.buttonText, { color: theme.text }]}>Make a Request</Text>
               </Animated.View>
             </TouchableOpacity>
@@ -81,7 +79,7 @@ const HomeScreen = ({ navigation }) => {
               onPressOut={handlePressOut}
               onPress={() => navigation.navigate('Booking')}>
               <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center', opacity: opacityAnim }}>
-                <Icon name="schedule" size={48} color={theme.text} />
+                <Icon name="schedule" size={55} color={theme.text} />
                 <Text style={[styles.buttonText, { color: theme.text }]}>Schedule a Booking</Text>
               </Animated.View>
             </TouchableOpacity>
@@ -94,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
               onPressOut={handlePressOut}
               onPress={() => navigation.navigate('Chat')}>
               <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center', opacity: opacityAnim }}>
-                <Icon name="chat" size={48} color={theme.text} />
+                <Icon name="chat" size={55} color={theme.text} />
                 <Text style={[styles.buttonText, { color: theme.text }]}>Chat</Text>
               </Animated.View>
             </TouchableOpacity>
@@ -105,7 +103,7 @@ const HomeScreen = ({ navigation }) => {
               onPressOut={handlePressOut}
               onPress={() => navigation.navigate('Info')}>
               <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center', opacity: opacityAnim }}>
-                <Icon name="info" size={48} color={theme.text} />
+                <Icon name="info" size={55} color={theme.text} />
                 <Text style={[styles.buttonText, { color: theme.text }]}>Information</Text>
               </Animated.View>
             </TouchableOpacity>
@@ -115,27 +113,22 @@ const HomeScreen = ({ navigation }) => {
         <View style={[styles.footer, { backgroundColor: theme.background }]}>
           <TouchableOpacity onPress={() => navigation.navigate('Home')} style={[styles.footerItem, styles.activeFooterItem]}>
             <Icon name="home" size={45}  style={styles.activeIcon} color={theme.text}/>
-            <Text style={[styles.footerText, { color: theme.text, fontWeight: 'bold' }]}>Home</Text>
+            {/* <Text style={[styles.footerText, { color: theme.text, fontWeight: 'bold' }]}>Home</Text> */}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
             <Icon name="schedule" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Booking</Text>
+            {/* <Text style={[styles.footerText, { color: theme.text }]}>Booking</Text> */}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
             <Icon name="payment" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Request</Text>
+            {/* <Text style={[styles.footerText, { color: theme.text }]}>Request</Text> */}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.footerItem}>
-            <Icon name="chat" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Chat</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.footerItem}>
-            <Icon name="info" size={34} color={theme.text} />
-            <Text style={[styles.footerText, { color: theme.text }]}>Info</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
+            <Icon name="person" size={34} color={theme.text} />
+            {/* <Text style={[styles.footerText, { color: theme.text }]}>Profile</Text> */}
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -191,7 +184,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 15,
     marginTop: 5,
     fontWeight: '500',
     textAlign: 'center',

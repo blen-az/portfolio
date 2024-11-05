@@ -1,4 +1,4 @@
-// NPS/screens/LoadingScreen.js
+
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { lightTheme } from './Theme';
