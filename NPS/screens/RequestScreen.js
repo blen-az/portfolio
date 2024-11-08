@@ -116,7 +116,7 @@ const RequestScreen = ({ navigation }) => {
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Notes (Optional)"
+          placeholder=" Additional Notes (Optional)"
           placeholderTextColor="#888"
           value={notes}
           onChangeText={setNotes}

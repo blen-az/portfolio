@@ -111,7 +111,7 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Social Media Link (e.g., Telegram, LinkedIn)"
+          placeholder="Social Media Link"
           placeholderTextColor="#888"
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
