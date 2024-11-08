@@ -79,14 +79,14 @@ const BookingScreen = ({ navigation }) => {
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="First Name"
-          placeholderTextColor={lightTheme.text}
+          placeholderTextColor="#888"
           value={firstName}
           onChangeText={setFirstName}
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Last Name"
-          placeholderTextColor={lightTheme.text}
+          placeholderTextColor="#888"
           value={lastName}
           onChangeText={setLastName}
         />
@@ -112,7 +112,7 @@ const BookingScreen = ({ navigation }) => {
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Social Media Link (e.g., Telegram, LinkedIn)"
-          placeholderTextColor={lightTheme.text}
+          placeholderTextColor="#888"
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
         />
@@ -133,7 +133,7 @@ const BookingScreen = ({ navigation }) => {
         <TextInput
           style={[styles.notesInput, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Additional Notes (Optional)"
-          placeholderTextColor={lightTheme.text}
+          placeholderTextColor="#888"
           value={notes}
           onChangeText={setNotes}
           multiline={true}

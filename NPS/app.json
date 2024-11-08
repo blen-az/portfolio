@@ -22,7 +22,7 @@
       "package": "com.blen_az.surepay"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/Icon.webp"
     },
     "extra": {
       "eas": {

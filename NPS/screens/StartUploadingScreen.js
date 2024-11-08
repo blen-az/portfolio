@@ -30,7 +30,7 @@ const StartUploadingScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: lightTheme.background }]}>
-      <Image source={require('../assets/logo1.webp')} style={styles.logo} />
+      <Image source={require('../assets/FBG.png')} style={styles.logo} />
       <Text style={styles.title}>SurePay</Text>
 
       <View style={styles.progressContainer}>

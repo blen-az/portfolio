@@ -49,7 +49,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground 
-        source={require('../assets/BG8.jpg')}
+        source={require('../assets/BG8.jpeg')}
         style={styles.backgroundImage}
       >
         <View style={[styles.header, {backgroundColor: theme.background}]}>
