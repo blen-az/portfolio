@@ -3,45 +3,50 @@ name: Build APK for NPS
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch (adjust if needed)
+      - main
   pull_request:
     branches:
-      - main  # Trigger for pull requests to the main branch (optional)
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3  # Check out your repository
+      uses: actions/checkout@v3
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16'  # Specify the Node.js version (adjust to match your project)
+        node-version: '16'
+        cache: 'npm'
 
     - name: Install dependencies
       run: |
-        cd NPS  # Navigate to your NPS project folder
-        npm install  # Install project dependencies
+        cd NPS
+        npm install
 
     - name: Install Expo CLI
-      run: |
-        npm install -g expo-cli  # Install Expo CLI globally
+      run: npm install -g expo-cli # Specify the version if necessary
+
+    - name: Login to Expo
+      run: expo login --non-interactive --username ${{ secrets.EXPO_USERNAME }} --password ${{ secrets.EXPO_PASSWORD }}
+      env:
+        EXPO_CLI_PASSWORD: ${{ secrets.EXPO_PASSWORD }}
 
     - name: Run Expo prebuild
       run: |
-        cd NPS  # Ensure you're in the NPS project directory
-        expo prebuild  # Generate the necessary Android files (including android folder)
+        cd NPS
+        expo prebuild
 
     - name: Build APK using Expo
       run: |
-        cd NPS  # Ensure you're in the NPS project directory
-        expo build:android --no-wait  # Builds the APK for Android
+        cd NPS
+        expo build:android --no-wait
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
         name: nps-apk
-        path: NPS/android/app/build/outputs/apk/release/app-release.apk  # Adjust the path to the APK
+        path: NPS/android/app/build/outputs/apk/release/app-release.apk
