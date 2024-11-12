@@ -1,0 +1,47 @@
+name: Build APK for NPS
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch (adjust if needed)
+  pull_request:
+    branches:
+      - main  # Trigger for pull requests to the main branch (optional)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3  # Check out your repository
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # Specify the Node.js version (adjust to match your project)
+
+    - name: Install dependencies
+      run: |
+        cd NPS  # Navigate to your NPS project folder
+        npm install  # Install project dependencies
+
+    - name: Install Expo CLI
+      run: |
+        npm install -g expo-cli  # Install Expo CLI globally
+
+    - name: Run Expo prebuild
+      run: |
+        cd NPS  # Ensure you're in the NPS project directory
+        expo prebuild  # Generate the necessary Android files (including android folder)
+
+    - name: Build APK using Expo
+      run: |
+        cd NPS  # Ensure you're in the NPS project directory
+        expo build:android --no-wait  # Builds the APK for Android
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: nps-apk
+        path: NPS/android/app/build/outputs/apk/release/app-release.apk  # Adjust the path to the APK
