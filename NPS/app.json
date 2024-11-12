@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.blenaz.surepay" 
+      "bundleIdentifier": "com.blen_az.surepay"
     },
     "android": {
       "adaptiveIcon": {
