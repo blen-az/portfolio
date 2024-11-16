@@ -4,10 +4,10 @@
     "slug": "surepay",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Icon.webp",
+    "icon": "./assets/iconL.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/iconL.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,15 +20,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.blen_az.surepay"
+      "package": "com.blen_az.surepay",
+      "newArchEnabled": true  
     },
     "web": {
       "favicon": "./assets/Icon.webp"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "fb76700c-10d5-4cf3-a72a-b6c7a8abc8d4"
-      }
     }
+    
   }
 }

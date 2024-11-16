@@ -38,7 +38,7 @@ const ManageBookingsScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200ea" />
+        <ActivityIndicator size="25" color="#6200ea" />
         <Text style={styles.loadingText}>Loading Bookings...</Text>
       </View>
     );

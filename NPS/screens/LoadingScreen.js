@@ -6,7 +6,7 @@ import { lightTheme } from './Theme';
 const LoadingScreen = () => {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color={lightTheme.primary} />
+      <ActivityIndicator size="25" color={lightTheme.primary} />
       <Text style={styles.loadingText}>Loading...</Text>
     </View>
   );

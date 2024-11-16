@@ -10,7 +10,7 @@ import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 const BookingScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('SAT');
   const [notes, setNotes] = useState('');
@@ -38,13 +38,13 @@ const BookingScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!firstName.trim() || !lastName.trim() || !socialMediaLink.trim()) {
+    if (!firstMiddleName.trim() || !lastName.trim() || !socialMediaLink.trim()) {
       Alert.alert('Error', 'Please fill in all required fields (First Name, Last Name, and Social Media Link).');
       return;
     }
 
     const bookingDetails = {
-      firstName,
+      firstMiddleName,
       lastName,
       paymentType,
       notes,
@@ -58,7 +58,7 @@ const BookingScreen = ({ navigation }) => {
       Alert.alert('Success', 'Booking Scheduled Successfully!');
       console.log("Document written with ID: ", docRef.id);
 
-      setFirstName('');
+      setFirstMiddleName('');
       setLastName('');
       setPaymentType('SAT');
       setNotes('');
@@ -78,10 +78,10 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="First Name"
+          placeholder="First & Middle Name"
           placeholderTextColor="#888"
           value={firstName}
-          onChangeText={setFirstName}
+          onChangeText={setFirstMiddleName}
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -111,7 +111,7 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Social Media Link"
+          placeholder="Your Social Media Link (Telegtam, Linkedin ...)"
           placeholderTextColor="#888"
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
@@ -132,7 +132,7 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.notesInput, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Additional Notes (Optional)"
+          placeholder="Additional Guide Notes (Optional)"
           placeholderTextColor="#888"
           value={notes}
           onChangeText={setNotes}

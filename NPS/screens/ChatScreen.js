@@ -1,28 +1,73 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Keyboard, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { fetchMessages, sendMessage } from '../services/chatService';
 import { AuthContext } from '../context/AuthContext';
-import { lightTheme } from '../screens/Theme'; 
+import { lightTheme } from '../screens/Theme';
 
 const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const userId = user?.uid || 'testUser';
 
+  const autoResponses = [
+    "Thank you for your message! Our team will get back to you shortly.",
+    "Can you provide more details about your query?",
+    "We appreciate your patience. Let us know how else we can help.",
+    "If you're looking for payment guidance, feel free to ask.",
+    "We're here to assist you with any concerns or inquiries you have."
+  ];
+
   useEffect(() => {
-    const unsubscribe = fetchMessages(userId, setMessages);
+    const unsubscribe = fetchMessages(userId, (fetchedMessages) => {
+      setMessages(fetchedMessages);
+
+      // Check if this is the first time the user is opening the chat
+      if (fetchedMessages.length === 0) {
+        sendWelcomeMessages();
+      }
+    });
+
     return () => unsubscribe();
   }, [userId]);
 
+  const sendWelcomeMessages = async () => {
+    // Array of predefined welcome messages
+    const welcomeMessages = [
+      "Welcome to SurePay Support! How can we assist you today?",
+      "You can ask about payment processes, schedules, or any other queries.",
+      "Our team is here to help. Feel free to type your question below."
+    ];
+
+    // Send messages one by one with a short delay for a more natural flow
+    for (const message of welcomeMessages) {
+      await sendMessage('admin', message);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
+    }
+  };
+
   const handleSendMessage = async () => {
     if (message.trim()) {
+      setIsLoading(true);
+
+      // Send user message
       const success = await sendMessage(userId, message);
+      setIsLoading(false);
+
       if (success) {
         setMessage('');
         Keyboard.dismiss();
+
+        // Simulate an auto-reply from the admin
+        setTimeout(async () => {
+          const randomResponse = autoResponses[Math.floor(Math.random() * autoResponses.length)];
+          await sendMessage('admin', randomResponse);
+        }, 2000); // 2-second delay for realism
+      } else {
+        Alert.alert('Error', 'Failed to send message.');
       }
     }
   };
@@ -30,7 +75,6 @@ const ChatScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={80}>
-        
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.navigate('Home')}>
             <Icon name="arrow-back" size={28} color={lightTheme.text} />
@@ -52,7 +96,7 @@ const ChatScreen = ({ navigation }) => {
                 { backgroundColor: msg.senderId === userId ? lightTheme.background : lightTheme.secondary },
               ]}
             >
-            <Text style={[styles.messageText, { color: lightTheme.text }]}>{msg.message}</Text>
+              <Text style={[styles.messageText, { color: lightTheme.text }]}>{msg.message}</Text>
             </View>
           ))}
         </ScrollView>
@@ -67,8 +111,16 @@ const ChatScreen = ({ navigation }) => {
             onSubmitEditing={handleSendMessage}
             returnKeyType="send"
           />
-          <TouchableOpacity style={[styles.sendButton, { backgroundColor: lightTheme.primary }]} onPress={handleSendMessage}>
-            <Text style={styles.sendButtonText}>Send</Text>
+          <TouchableOpacity
+            style={[styles.sendButton, { backgroundColor: lightTheme.primary }]}
+            onPress={handleSendMessage}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.sendButtonText}>Send</Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

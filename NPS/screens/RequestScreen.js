@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
 import { saveRequest } from '../services/requestService';
@@ -9,12 +10,14 @@ import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const RequestScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('');
   const [notes, setNotes] = useState('');
   const [socialMediaLink, setSocialMediaLink] = useState('');
   const [screenshot, setScreenshot] = useState(null);
+  const [time, setTime] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const { user } = useContext(AuthContext);
 
   const pickImage = async () => {
@@ -26,6 +29,12 @@ const RequestScreen = ({ navigation }) => {
     if (!result.canceled) {
       setScreenshot(result.uri);
     }
+  };
+
+  const handleTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || time;
+    setShowTimePicker(false);
+    setTime(currentTime);
   };
 
   const handleSubmit = async () => {
@@ -40,12 +49,13 @@ const RequestScreen = ({ navigation }) => {
     }
 
     const requestDetails = {
-      firstName,
+      firstMiddleName,
       lastName,
       paymentType,
       notes,
       socialMediaLink,
       screenshot,
+      time: time.toISOString(),
       userId: user.uid,
       timestamp: new Date().toISOString(),
     };
@@ -54,12 +64,13 @@ const RequestScreen = ({ navigation }) => {
       const response = await saveRequest(user.uid, requestDetails);
       if (response.success) {
         Alert.alert('Success', 'Request Submitted Successfully');
-        setFirstName('');
+        setFirstMiddleName('');
         setLastName('');
         setPaymentType('');
         setNotes('');
         setSocialMediaLink('');
         setScreenshot(null);
+        setTime(new Date());
       } else {
         Alert.alert('Error', 'Failed to submit the request');
       }
@@ -73,13 +84,14 @@ const RequestScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
         <Text style={[styles.title, { color: lightTheme.text }]}>Submit a Payment Request</Text>
+        <Text style={[styles.title2, { color: lightTheme.text }]}>Payment Made Within 24 Hours</Text>
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="First Name"
+          placeholder="First & Middle Name"
           placeholderTextColor="#888"
           value={firstName}
-          onChangeText={setFirstName}
+          onChangeText={setFirstMiddleName}
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -88,7 +100,7 @@ const RequestScreen = ({ navigation }) => {
           value={lastName}
           onChangeText={setLastName}
         />
-        
+
         <Picker
           selectedValue={paymentType}
           style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -109,128 +121,68 @@ const RequestScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Social Media Link"
+          placeholder="Your Social Media Link (Telegtam, Linkedin ...)"
           placeholderTextColor="#888"
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder=" Additional Notes (Optional)"
+          placeholder="Additional Guide Notes (Optional)"
           placeholderTextColor="#888"
           value={notes}
           onChangeText={setNotes}
         />
-        
+
+        <TouchableOpacity style={[styles.timePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowTimePicker(true)}>
+          <Text style={styles.buttonText}>Pick a Time</Text>
+        </TouchableOpacity>
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        )}
+        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Selected Time: {time.toLocaleTimeString()}</Text>
+
         <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
           <Text style={styles.buttonText}>Upload Screenshot</Text>
         </TouchableOpacity>
         {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
-        
+
         <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit Request</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      <View style={[styles.footer, { backgroundColor: lightTheme.background }]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
-          <Icon name="home" size={34} color={lightTheme.text} />
-          {/* <Text style={styles.footerText}>Home</Text> */}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
-          <Icon name="schedule" size={34} color={lightTheme.text} />
-          {/* <Text style={styles.footerText}>Booking</Text> */}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Request')} style={[styles.footerItem, styles.activeFooterItem]}>
-          <Icon name="payment" size={45} style={styles.activeIcon} color={lightTheme.text} />
-          {/* <Text style={[styles.footerText, { fontWeight: 'bold', color: lightTheme.text }]}>Request</Text> */}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
-            <Icon name="person" size={34} color={lightTheme.text} />
-            {/* <Text style={[styles.footerText, { color: lightTheme.text }]}>Profile</Text> */}
-          </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderRadius: 15,
-    padding: 15,
-    width: '90%',
-    marginBottom: 20,
-  },
-  picker: {
-    width: '90%',
-    marginBottom: 20,
-    borderRadius: 15,
-  },
-  imagePickerButton: {
-    padding: 15,
-    borderRadius: 25,
-    width: '80%',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  screenshot: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-    borderRadius: 15,
-  },
-  button: {
-    padding: 15,
-    borderRadius: 25,
-    width: '80%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-  },
-  footerItem: {
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    marginTop: 5,
-  },
-  activeFooterItem: {
-    elevation: 5,
-    shadowColor: '#007aff',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  activeIcon: {
-    transform: [{ scale: 1.2 }],
-  },
+  container: { flex: 1 },
+  scrollContainer: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    padding: 20 },
+  title: { 
+    fontSize: 24, 
+    marginBottom: 20, 
+    textAlign: 'center' },
+  input: { 
+    borderRadius: 15, 
+    padding: 15, 
+    width: '90%', 
+    marginBottom: 20 },
+  picker: { 
+    width: '90%', marginBottom: 20, borderRadius: 15 },
+  timePickerButton: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center', marginBottom: 20 },
+  imagePickerButton: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center', marginBottom: 20 },
+  screenshot: { width: 100, height: 100, marginBottom: 20, borderRadius: 15 },
+  button: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center' },
+  buttonText: { color: 'white', fontSize: 18 },
 });
 
 export default RequestScreen;
