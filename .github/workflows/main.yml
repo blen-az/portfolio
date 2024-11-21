@@ -1,0 +1,52 @@
+name: Build APK for NPS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd NPS
+        npm install
+
+    - name: Install Expo CLI
+      run: npm install -g expo-cli # Specify the version if necessary
+
+    - name: Login to Expo
+      run: expo login --non-interactive --username ${{ secrets.EXPO_USERNAME }} --password ${{ secrets.EXPO_PASSWORD }}
+      env:
+        EXPO_CLI_PASSWORD: ${{ secrets.EXPO_PASSWORD }}
+
+    - name: Run Expo prebuild
+      run: |
+        cd NPS
+        expo prebuild
+
+    - name: Build APK using Expo
+      run: |
+        cd NPS
+        expo build:android --no-wait
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: nps-apk
+        path: NPS/android/app/build/outputs/apk/release/app-release.apk
