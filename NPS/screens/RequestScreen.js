@@ -2,12 +2,15 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
 import { saveRequest } from '../services/requestService';
 import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
 
 const RequestScreen = ({ navigation }) => {
   const theme = lightTheme;
@@ -27,18 +30,59 @@ const RequestScreen = ({ navigation }) => {
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaType.IMAGE,
         allowsEditing: true,
         aspect: [4, 3],
+        quality: 1,
       });
       if (!result.canceled) {
-        setScreenshot(result.assets[0].uri); // Updated for latest Expo SDK
+        const localUri = result.assets[0].uri;
+        console.log('Selected Image URI:', localUri);
+
+        // Copy image to a local temporary file using expo-file-system
+        const fileName = localUri.split('/').pop();
+        const newPath = `${FileSystem.cacheDirectory}${fileName}`;
+        await FileSystem.copyAsync({
+          from: localUri,
+          to: newPath,
+        });
+        console.log('Temporary Path:', newPath);
+        setScreenshot(newPath);
       }
     } catch (error) {
       console.error('Error picking image:', error);
       Alert.alert('Error', 'An error occurred while picking the image.');
     }
   };
+
+  const uploadScreenshot = async () => {
+    if (!screenshot) {
+      Alert.alert('Error', 'No screenshot selected.');
+      return null;
+    }
+
+    try {
+      const fileName = `screenshots/${new Date().getTime()}_${screenshot.split('/').pop()}`;
+      const imageRef = ref(storage, fileName);
+
+      console.log('Uploading from Temporary Path:', screenshot);
+
+      const fileBlob = await FileSystem.readAsStringAsync(screenshot, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const buffer = Uint8Array.from(atob(fileBlob), (c) => c.charCodeAt(0));
+
+      await uploadBytes(imageRef, buffer);
+      const downloadURL = await getDownloadURL(imageRef);
+      console.log('Uploaded Image URL:', downloadURL);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload the image. Please try again.');
+      return null;
+    }
+  };
+
 
   const handleTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
@@ -62,7 +106,13 @@ const RequestScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please fill all the required fields (First Name, Last Name, Payment Type, and Sex)');
       return;
     }
+    let screenshotUrl = null;
+    if (screenshot) {
+      screenshotUrl = await uploadScreenshot();
+      if (!screenshotUrl) return;
+    }
 
+    
     const requestDetails = {
       firstName,
       lastName,
@@ -80,6 +130,7 @@ const RequestScreen = ({ navigation }) => {
     try {
       const response = await saveRequest(user.uid, requestDetails);
       if (response.success) {
+        console.log('Submitting request details:', requestDetails);
         Alert.alert('Success', 'Request Submitted Successfully');
         setFirstMiddleName('');
         setLastName('');
@@ -136,7 +187,7 @@ const RequestScreen = ({ navigation }) => {
           style={[styles.datePickerButton, { backgroundColor: theme.primary }]}
           onPress={() => setShowBirthdatePicker(true)}
         >
-          <Text style={styles.buttonText}>Pick Birthdate</Text>
+          <Text style={styles.buttonText}>Birthdate</Text>
         </TouchableOpacity>
         {showBirthdatePicker && (
           <DateTimePicker
@@ -165,6 +216,21 @@ const RequestScreen = ({ navigation }) => {
           <Picker.Item label="PLAB Exam" value="PLAB" />
           <Picker.Item label="OTHERS" value="OTHERS" />
         </Picker>
+        <TouchableOpacity
+          style={[styles.timePickerButton, { backgroundColor: theme.primary }]}
+          onPress={() => setShowTimePicker(true)}
+        >
+          <Text style={styles.buttonText}>Pick a Time</Text>
+        </TouchableOpacity>
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        )}
+        <Text style={{ color: theme.text, marginBottom: 20 }}>Selected Time: {time.toLocaleTimeString()}</Text>
 
         <TextInput
           style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
@@ -181,21 +247,6 @@ const RequestScreen = ({ navigation }) => {
           onChangeText={setNotes}
         />
 
-        <TouchableOpacity
-          style={[styles.timePickerButton, { backgroundColor: theme.primary }]}
-          onPress={() => setShowTimePicker(true)}
-        >
-          <Text style={styles.buttonText}>Pick a Time</Text>
-        </TouchableOpacity>
-        {showTimePicker && (
-          <DateTimePicker
-            value={time}
-            mode="time"
-            display="default"
-            onChange={handleTimeChange}
-          />
-        )}
-        <Text style={{ color: theme.text, marginBottom: 20 }}>Selected Time: {time.toLocaleTimeString()}</Text>
 
         <View style={styles.uploadContainer}>
           <TouchableOpacity

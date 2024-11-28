@@ -129,7 +129,7 @@ const BookingScreen = ({ navigation }) => {
         </Picker>
 
         <TouchableOpacity style={[styles.datePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowBirthdatePicker(true)}>
-          <Text style={styles.buttonText}>Pick Birthdate</Text>
+          <Text style={styles.buttonText}>Birthdate</Text>
         </TouchableOpacity>
         {showBirthdatePicker && (
           <DateTimePicker value={birthdate} mode="date" display="default" onChange={onChangeBirthdate} />
@@ -153,6 +153,14 @@ const BookingScreen = ({ navigation }) => {
           <Picker.Item label="PLAB Exam" value="PLAB" />
           <Picker.Item label="OTHERS" value="OTHERS" />
         </Picker>
+
+        <TouchableOpacity style={[styles.datePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.buttonText}>Payment Day</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker value={date} mode="date" display="default" onChange={onChangeBirthdate} />
+        )}
+        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Payment Day: {birthdate.toDateString()}</Text>
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
