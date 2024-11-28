@@ -10,8 +10,12 @@ import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const RequestScreen = ({ navigation }) => {
+  const theme = lightTheme;
   const [firstName, setFirstMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [sex, setSex] = useState('');
+  const [birthdate, setBirthdate] = useState(new Date());
+  const [showBirthdatePicker, setShowBirthdatePicker] = useState(false);
   const [paymentType, setPaymentType] = useState('');
   const [notes, setNotes] = useState('');
   const [socialMediaLink, setSocialMediaLink] = useState('');
@@ -21,13 +25,18 @@ const RequestScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-    });
-    if (!result.canceled) {
-      setScreenshot(result.uri);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+      });
+      if (!result.canceled) {
+        setScreenshot(result.assets[0].uri); // Updated for latest Expo SDK
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'An error occurred while picking the image.');
     }
   };
 
@@ -37,20 +46,28 @@ const RequestScreen = ({ navigation }) => {
     setTime(currentTime);
   };
 
+  const handleBirthdateChange = (event, selectedDate) => {
+    const currentBirthdate = selectedDate || birthdate;
+    setShowBirthdatePicker(false);
+    setBirthdate(currentBirthdate);
+  };
+
   const handleSubmit = async () => {
     if (!user) {
       Alert.alert('Error', 'User not logged in');
       return;
     }
 
-    if (!firstName.trim() || !lastName.trim() || !paymentType) {
-      Alert.alert('Error', 'Please fill all the required fields (First Name, Last Name, and Payment Type)');
+    if (!firstName.trim() || !lastName.trim() || !paymentType || !sex) {
+      Alert.alert('Error', 'Please fill all the required fields (First Name, Last Name, Payment Type, and Sex)');
       return;
     }
 
     const requestDetails = {
-      firstMiddleName,
+      firstName,
       lastName,
+      sex,
+      birthdate: birthdate.toISOString(),
       paymentType,
       notes,
       socialMediaLink,
@@ -66,6 +83,8 @@ const RequestScreen = ({ navigation }) => {
         Alert.alert('Success', 'Request Submitted Successfully');
         setFirstMiddleName('');
         setLastName('');
+        setSex('');
+        setBirthdate(new Date());
         setPaymentType('');
         setNotes('');
         setSocialMediaLink('');
@@ -80,30 +99,58 @@ const RequestScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: lightTheme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-        <Text style={[styles.title, { color: lightTheme.text }]}>Submit a Payment Request</Text>
-        <Text style={[styles.title2, { color: lightTheme.text }]}>Payment Made Within 24 Hours</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Submit a Payment Request</Text>
+        <Text style={[styles.title2, { color: theme.text }]}>Payment Made Within 24 Hours</Text>
 
         <TextInput
-          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="First & Middle Name"
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          placeholder="First Name"
           placeholderTextColor="#888"
           value={firstName}
           onChangeText={setFirstMiddleName}
         />
         <TextInput
-          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
           placeholder="Last Name"
           placeholderTextColor="#888"
           value={lastName}
           onChangeText={setLastName}
         />
 
+        {/* Sex Picker */}
+        <Picker
+          selectedValue={sex}
+          style={[styles.picker, { backgroundColor: theme.secondary, color: theme.text }]}
+          onValueChange={(itemValue) => setSex(itemValue)}
+        >
+          <Picker.Item label="Gender" value="" />
+          <Picker.Item label="Male" value="Male" />
+          <Picker.Item label="Female" value="Female" />
+          <Picker.Item label="Other" value="Other" />
+        </Picker>
+
+        {/* Birthdate Picker */}
+        <TouchableOpacity
+          style={[styles.datePickerButton, { backgroundColor: theme.primary }]}
+          onPress={() => setShowBirthdatePicker(true)}
+        >
+          <Text style={styles.buttonText}>Pick Birthdate</Text>
+        </TouchableOpacity>
+        {showBirthdatePicker && (
+          <DateTimePicker
+            value={birthdate}
+            mode="date"
+            display="default"
+            onChange={handleBirthdateChange}
+          />
+        )}
+        <Text style={{ color: theme.text, marginBottom: 20 }}>Birthdate: {birthdate.toDateString()}</Text>
+
         <Picker
           selectedValue={paymentType}
-          style={[styles.picker, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          style={[styles.picker, { backgroundColor: theme.secondary, color: theme.text }]}
           onValueChange={(itemValue) => setPaymentType(itemValue)}
         >
           <Picker.Item label="Select Payment Type" value="" />
@@ -120,21 +167,24 @@ const RequestScreen = ({ navigation }) => {
         </Picker>
 
         <TextInput
-          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="Your Social Media Link (Telegtam, Linkedin ...)"
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          placeholder="Your Social Media Link (Telegram, Linkedin ...)"
           placeholderTextColor="#888"
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
         />
         <TextInput
-          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
           placeholder="Additional Guide Notes (Optional)"
           placeholderTextColor="#888"
           value={notes}
           onChangeText={setNotes}
         />
 
-        <TouchableOpacity style={[styles.timePickerButton, { backgroundColor: lightTheme.primary }]} onPress={() => setShowTimePicker(true)}>
+        <TouchableOpacity
+          style={[styles.timePickerButton, { backgroundColor: theme.primary }]}
+          onPress={() => setShowTimePicker(true)}
+        >
           <Text style={styles.buttonText}>Pick a Time</Text>
         </TouchableOpacity>
         {showTimePicker && (
@@ -145,42 +195,78 @@ const RequestScreen = ({ navigation }) => {
             onChange={handleTimeChange}
           />
         )}
-        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Selected Time: {time.toLocaleTimeString()}</Text>
+        <Text style={{ color: theme.text, marginBottom: 20 }}>Selected Time: {time.toLocaleTimeString()}</Text>
 
-        <TouchableOpacity style={[styles.imagePickerButton, { backgroundColor: lightTheme.primary }]} onPress={pickImage}>
-          <Text style={styles.buttonText}>Upload Screenshot</Text>
-        </TouchableOpacity>
-        {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
+        <View style={styles.uploadContainer}>
+          <TouchableOpacity
+            style={[styles.imagePickerButton, { backgroundColor: theme.primary }]}
+            onPress={pickImage}
+          >
+            <Text style={styles.buttonText}>Upload Screenshot</Text>
+          </TouchableOpacity>
+          {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
+        </View>
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={handleSubmit}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={handleSubmit}
+        >
           <Text style={styles.buttonText}>Submit Request</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Footer */}
+      <View style={[styles.footer, { backgroundColor: theme.background }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
+          <Icon name="home" size={34} color={theme.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
+          <Icon name="payment" size={45} color={theme.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
+          <Icon name="schedule" size={34} color={theme.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
+          <Icon name="person" size={45} color={theme.text} />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContainer: { 
+  container: { 
+    flex: 1 
+  },
+  scrollContainer: {
     flexGrow: 1, 
     justifyContent: 'center', 
     alignItems: 'center', 
-    padding: 20 },
-  title: { 
-    fontSize: 24, 
-    marginBottom: 20, 
-    textAlign: 'center' },
-  input: { 
-    borderRadius: 15, 
-    padding: 15, 
-    width: '90%', 
-    marginBottom: 20 },
-  picker: { 
-    width: '90%', marginBottom: 20, borderRadius: 15 },
-  timePickerButton: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center', marginBottom: 20 },
-  imagePickerButton: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center', marginBottom: 20 },
-  screenshot: { width: 100, height: 100, marginBottom: 20, borderRadius: 15 },
+    padding: 20 
+  },
+  title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
+  input: { borderRadius: 15, padding: 15, width: '90%', marginBottom: 20 },
+  picker: { width: '90%', marginBottom: 20, borderRadius: 15 },
+  datePickerButton: { padding: 10,
+    borderRadius: 20,
+    width: '60%',
+    alignItems: 'center', },
+  timePickerButton: { padding: 10,
+    borderRadius: 20,
+    width: '60%',
+    alignItems: 'center',},
+  imagePickerButton: { padding: 10,
+    borderRadius: 20,
+    width: '60%',
+    alignItems: 'center', },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      paddingVertical: 15,
+    },
+  uploadContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  screenshot: { width: 60, height: 60, marginLeft: 15, borderRadius: 10 },
   button: { padding: 15, borderRadius: 25, width: '80%', alignItems: 'center' },
   buttonText: { color: 'white', fontSize: 18 },
 });

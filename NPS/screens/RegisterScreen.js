@@ -72,7 +72,7 @@ const RegisterScreen = () => {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color={lightTheme.text} />
+          <ActivityIndicator size="small" color={lightTheme.secondary} />
         ) : (
           <Text style={styles.buttonText}>Sign Up</Text>
         )}

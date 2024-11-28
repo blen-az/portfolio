@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { AuthContextProvider, useAuth } from './context/AuthContext';
 import AppNavigator from './navigation/AppNavigator';
 import AdminNavigator from './navigation/AdminNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import StartUploadingScreen from './screens/StartUploadingScreen';
+import UserGuideScreen from './screens/UserGuideScreen';
 
 const AppContent = () => {
   const [isUploading, setIsUploading] = useState(true); // Track initial loading state
   const { user, isAuthenticated, logout } = useAuth();
+  const navigation = useNavigation();
 
   useEffect(() => {
     // Simulate upload process or initial loading phase
@@ -33,6 +35,11 @@ const AppContent = () => {
   // If not authenticated, show the login flow
   if (!isAuthenticated) {
     return <AuthNavigator />;
+  }
+
+  // Navigate to UserGuideScreen if `hasSeenGuide` is false
+  if (user.hasSeenGuide === false) {
+    return <UserGuideScreen />;
   }
 
   // Return the main navigation based on user role

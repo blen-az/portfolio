@@ -1,39 +1,52 @@
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, Modal } from 'react-native';
 import { fetchRequests, updateRequestStatus } from '../services/requestService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ManageRequestsScreen = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     loadRequests();
   }, []);
 
   const loadRequests = async () => {
+    setLoading(true);
     const fetchedRequests = await fetchRequests();
     setRequests(fetchedRequests);
     setLoading(false);
   };
 
   const handleApprove = async (id) => {
-    await updateRequestStatus(id, 'Approved');
-    Alert.alert('Request Approved');
-    loadRequests();
+    const result = await updateRequestStatus(requests, setRequests, id, 'Approved');
+    if (result.success) {
+      Alert.alert('Success', 'Request Approved');
+    } else {
+      Alert.alert('Error', 'Failed to update status');
+    }
   };
 
   const handleDecline = async (id) => {
-    await updateRequestStatus(id, 'Declined');
-    Alert.alert('Request Declined');
-    loadRequests();
+    const result = await updateRequestStatus(requests, setRequests, id, 'Declined');
+    if (result.success) {
+      Alert.alert('Success', 'Request Declined');
+    } else {
+      Alert.alert('Error', 'Failed to update status');
+    }
+  };
+
+  const handleImagePress = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setModalVisible(true);
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="25" color="#6200ea" />
+        <ActivityIndicator size="large" color="#6200ea" />
         <Text style={styles.loadingText}>Loading Requests...</Text>
       </View>
     );
@@ -45,8 +58,13 @@ const ManageRequestsScreen = () => {
         <Text style={styles.requestText}>Name: {item.firstName} {item.lastName}</Text>
         <Text style={styles.requestText}>Type: {item.paymentType}</Text>
         <Text style={styles.requestText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
-        <Text style={styles.requestText}>Notes: {item.notes}</Text>
+        <Text style={styles.requestText}>Notes: {item.notes || 'No Notes Provided'}</Text>
         <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
+        {item.screenshot && (
+          <TouchableOpacity onPress={() => handleImagePress(item.screenshot)}>
+            <Image source={{ uri: item.screenshot }} style={styles.screenshot} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={[styles.button, styles.approveButton]} onPress={() => handleApprove(item.id)}>
@@ -62,21 +80,45 @@ const ManageRequestsScreen = () => {
   );
 
   return (
-    <FlatList
-      data={requests}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.listContainer}
-      renderItem={renderRequestItem}
-    />
+    <View style={styles.container}>
+      <FlatList
+        data={requests}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        renderItem={renderRequestItem}
+      />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          {selectedImage && (
+            <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} />
+          )}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.textStyle}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   loadingText: {
     marginTop: 10,
@@ -110,6 +152,12 @@ const styles = StyleSheet.create({
     color: '#6200ea',
     fontWeight: 'bold',
   },
+  screenshot: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
+    borderRadius: 5,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -132,6 +180,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     marginLeft: 5,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  fullscreenImage: {
+    width: '90%',
+    height: '80%',
+    resizeMode: 'contain',
+  },
+  closeButton: {
+    backgroundColor: '#6200ea',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 15,
+  },
+  textStyle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

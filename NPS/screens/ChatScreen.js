@@ -34,19 +34,19 @@ const ChatScreen = ({ navigation }) => {
     return () => unsubscribe();
   }, [userId]);
 
-  const sendWelcomeMessages = async () => {
-    // Array of predefined welcome messages
+  const sendWelcomeMessages = () => {
     const welcomeMessages = [
       "Welcome to SurePay Support! How can we assist you today?",
       "You can ask about payment processes, schedules, or any other queries.",
       "Our team is here to help. Feel free to type your question below."
     ];
 
-    // Send messages one by one with a short delay for a more natural flow
-    for (const message of welcomeMessages) {
-      await sendMessage('admin', message);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
-    }
+    // Display messages progressively with a delay
+    welcomeMessages.forEach((message, index) => {
+      setTimeout(async () => {
+        await sendMessage('admin', message);
+      }, index * 3000); // 3-second interval between each message
+    });
   };
 
   const handleSendMessage = async () => {

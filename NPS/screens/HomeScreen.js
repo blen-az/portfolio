@@ -7,10 +7,17 @@ import { AuthContext } from '../context/AuthContext';
 
 const HomeScreen = ({ navigation }) => {
   const theme = lightTheme;
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   const scaleAnim = new Animated.Value(1);
   const opacityAnim = new Animated.Value(0.8);
+
+  useEffect(() => {
+    // Redirect to UserGuideScreen if the user hasn't seen the guide
+    if (user && user.hasSeenGuide === false) {
+      navigation.replace('UserGuide');
+    }
+  }, [user, navigation]);
 
   useEffect(() => {
     Animated.timing(opacityAnim, {
@@ -36,20 +43,38 @@ const HomeScreen = ({ navigation }) => {
     }).start();
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      Alert.alert('Logout', 'You have been logged out successfully.');
-      navigation.replace('Login');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    }
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Logout cancelled'),
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {          
+              console.log('Logout successful');    
+              await logout();
+              Alert.alert('Logout', 'You have been logged out successfully.');
+              navigation.replace('Login');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to log out. Please try again.');
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground 
-        source={require('../assets/BG8.jpeg')}
+        source={require('../assets/New BG.png')}
         style={styles.backgroundImage}
       >
         <View style={[styles.header, {backgroundColor: theme.background}]}>
@@ -80,7 +105,7 @@ const HomeScreen = ({ navigation }) => {
               onPress={() => navigation.navigate('Booking')}>
               <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center', opacity: opacityAnim }}>
                 <Icon name="schedule" size={55} color={theme.text} />
-                <Text style={[styles.buttonText, { color: theme.text }]}>Schedule a Booking</Text>
+                <Text style={[styles.buttonText, { color: theme.text }]}>Schedule a Payment</Text>
               </Animated.View>
             </TouchableOpacity>
           </View>
@@ -114,12 +139,12 @@ const HomeScreen = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerItem}>
             <Icon name="home" size={45} color={theme.text} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
-            <Icon name="schedule" size={34} color={theme.text} />
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Request')} style={styles.footerItem}>
             <Icon name="payment" size={34} color={theme.text} />
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Booking')} style={styles.footerItem}>
+            <Icon name="schedule" size={34} color={theme.text} />
+          </TouchableOpacity>      
           <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.footerItem}>
             <Icon name="person" size={34} color={theme.text} />
           </TouchableOpacity>

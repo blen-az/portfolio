@@ -54,7 +54,7 @@ const LoginScreen = () => {
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Email"
-        placeholderTextColor={lightTheme.text}
+        placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -62,7 +62,7 @@ const LoginScreen = () => {
       <TextInput
         style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
         placeholder="Password"
-        placeholderTextColor={lightTheme.text}
+        placeholderTextColor="#888"
         secureTextEntry
         value={password}
         onChangeText={setPassword}

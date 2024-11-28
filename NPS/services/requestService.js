@@ -1,13 +1,15 @@
-import { db } from '../firebase';
-import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
+// services/requestService.js
+import { db } from '../firebase'; // Ensure this path points to your Firebase configuration
+import { collection, addDoc, getDocs, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 
+// Function to add a new request
 export const saveRequest = async (userId, requestDetails) => {
   try {
     const docRef = await addDoc(collection(db, 'requests'), {
       userId,
       ...requestDetails,
-      status: 'Pending', 
-      timestamp: new Date().toISOString(), 
+      status: 'Pending',
+      timestamp: serverTimestamp(), // Use server timestamp for consistency
     });
     console.log("Document written with ID: ", docRef.id);
     return { success: true, id: docRef.id };
@@ -17,7 +19,7 @@ export const saveRequest = async (userId, requestDetails) => {
   }
 };
 
-
+// Function to fetch all requests
 export const fetchRequests = async () => {
   try {
     const requests = [];
@@ -32,10 +34,16 @@ export const fetchRequests = async () => {
   }
 };
 
-export const updateRequestStatus = async (requestId, newStatus) => {
+// Function to update a request's status
+export const updateRequestStatus = async (requests, setRequests, requestId, newStatus) => {
   try {
     const requestRef = doc(db, 'requests', requestId);
     await updateDoc(requestRef, { status: newStatus });
+    // Optimistically update the local state
+    const updatedRequests = requests.map(req =>
+      req.id === requestId ? { ...req, status: newStatus } : req
+    );
+    setRequests(updatedRequests);
     console.log(`Request ${requestId} status updated to ${newStatus}`);
     return { success: true };
   } catch (error) {
