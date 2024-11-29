@@ -5,13 +5,16 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { saveRequest } from '../services/requestService';
 import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const RequestScreen = ({ navigation }) => {
   const theme = lightTheme;
-  const [firstName, setFirstMiddleName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [middelName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [sex, setSex] = useState('');
   const [birthdate, setBirthdate] = useState(new Date());
@@ -32,11 +35,27 @@ const RequestScreen = ({ navigation }) => {
         aspect: [4, 3],
       });
       if (!result.canceled) {
-        setScreenshot(result.assets[0].uri); // Updated for latest Expo SDK
+        setScreenshot(result.assets[0].uri);
       }
     } catch (error) {
       console.error('Error picking image:', error);
       Alert.alert('Error', 'An error occurred while picking the image.');
+    }
+  };
+  
+  const uploadImage = async (uri) => {
+    try {
+      const storage = getStorage();
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = `screenshots/${Date.now()}.jpg`;
+      const storageRef = ref(storage, filename);
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      setScreenshot(downloadURL); // Save URL for later use
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload the image.');
     }
   };
 
@@ -65,6 +84,7 @@ const RequestScreen = ({ navigation }) => {
 
     const requestDetails = {
       firstName,
+      middelName,
       lastName,
       sex,
       birthdate: birthdate.toISOString(),
@@ -81,7 +101,8 @@ const RequestScreen = ({ navigation }) => {
       const response = await saveRequest(user.uid, requestDetails);
       if (response.success) {
         Alert.alert('Success', 'Request Submitted Successfully');
-        setFirstMiddleName('');
+        setFirstName('');
+        setMiddleName('')
         setLastName('');
         setSex('');
         setBirthdate(new Date());
@@ -109,7 +130,14 @@ const RequestScreen = ({ navigation }) => {
           placeholder="First Name"
           placeholderTextColor="#888"
           value={firstName}
-          onChangeText={setFirstMiddleName}
+          onChangeText={setFirstName}
+        />
+          <TextInput
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
+          placeholder="Middle Name"
+          placeholderTextColor="#888"
+          value={middelName}
+          onChangeText={setMiddleName}
         />
         <TextInput
           style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}

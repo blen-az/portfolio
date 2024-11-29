@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, Modal } from 'react-native';
-import { fetchRequests, updateRequestStatus } from '../services/requestService';
+import { fetchRequests, updateRequestStatus, deleteRequest } from '../services/requestService'; // Ensure these are defined
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ManageRequestsScreen = () => {
@@ -15,26 +15,46 @@ const ManageRequestsScreen = () => {
 
   const loadRequests = async () => {
     setLoading(true);
-    const fetchedRequests = await fetchRequests();
-    setRequests(fetchedRequests);
-    setLoading(false);
-  };
-
-  const handleApprove = async (id) => {
-    const result = await updateRequestStatus(requests, setRequests, id, 'Approved');
-    if (result.success) {
-      Alert.alert('Success', 'Request Approved');
-    } else {
-      Alert.alert('Error', 'Failed to update status');
+    try {
+      const result = await fetchRequests();
+      if (result.success) {
+        // Ensure requests are sorted by the timestamp in descending order
+        const sortedRequests = result.requests.sort(
+          (a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()
+        );
+        setRequests(sortedRequests);
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to load requests.');
+      }
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDecline = async (id) => {
-    const result = await updateRequestStatus(requests, setRequests, id, 'Declined');
-    if (result.success) {
-      Alert.alert('Success', 'Request Declined');
+  const handleUpdateStatus = async (id, newStatus) => {
+    if (newStatus === 'Declined') {
+      const result = await deleteRequest(id); // Automatically delete declined requests
+      if (result.success) {
+        Alert.alert('Success', 'Request Declined and Removed');
+        setRequests((prevRequests) => prevRequests.filter((request) => request.id !== id));
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to decline request.');
+      }
     } else {
-      Alert.alert('Error', 'Failed to update status');
+      const result = await updateRequestStatus(id, { status: newStatus });
+      if (result.success) {
+        Alert.alert('Success', `Request ${newStatus}`);
+        setRequests((prevRequests) =>
+          prevRequests.map((request) =>
+            request.id === id ? { ...request, status: newStatus } : request
+          )
+        );
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to update request status.');
+      }
     }
   };
 
@@ -42,6 +62,37 @@ const ManageRequestsScreen = () => {
     setSelectedImage(imageUrl);
     setModalVisible(true);
   };
+
+  const renderRequestItem = ({ item }) => (
+    <View style={styles.requestItem}>
+      <Text style={styles.requestText}>Name: {item.firstName} {item.lastName}</Text>
+      <Text style={styles.requestText}>Type: {item.paymentType}</Text>
+      <Text style={styles.requestText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
+      <Text style={styles.requestText}>Notes: {item.notes || 'No Notes Provided'}</Text>
+      <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
+      {item.screenshot && (
+        <TouchableOpacity onPress={() => handleImagePress(item.screenshot)}>
+          <Image source={{ uri: item.screenshot }} style={styles.screenshot} />
+        </TouchableOpacity>
+      )}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.approveButton]}
+          onPress={() => handleUpdateStatus(item.id, 'Approved')}
+        >
+          <Icon name="check-circle" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Approve</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.declineButton]}
+          onPress={() => handleUpdateStatus(item.id, 'Declined')}
+        >
+          <Icon name="cancel" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Decline</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -52,57 +103,35 @@ const ManageRequestsScreen = () => {
     );
   }
 
-  const renderRequestItem = ({ item }) => (
-    <View style={styles.requestItem}>
-      <View style={styles.textContainer}>
-        <Text style={styles.requestText}>Name: {item.firstName} {item.lastName}</Text>
-        <Text style={styles.requestText}>Type: {item.paymentType}</Text>
-        <Text style={styles.requestText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
-        <Text style={styles.requestText}>Notes: {item.notes || 'No Notes Provided'}</Text>
-        <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
-        {item.screenshot && (
-          <TouchableOpacity onPress={() => handleImagePress(item.screenshot)}>
-            <Image source={{ uri: item.screenshot }} style={styles.screenshot} />
-          </TouchableOpacity>
-        )}
+  if (requests.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>No requests available.</Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, styles.approveButton]} onPress={() => handleApprove(item.id)}>
-          <Icon name="check-circle" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Approve</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.declineButton]} onPress={() => handleDecline(item.id)}>
-          <Icon name="cancel" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Decline</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
         data={requests}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
         renderItem={renderRequestItem}
+        contentContainerStyle={styles.listContainer}
       />
-
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.centeredView}>
-          {selectedImage && (
-            <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} />
-          )}
+        <View style={styles.modalContainer}>
+          <Image source={{ uri: selectedImage }} style={styles.fullImage} />
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setModalVisible(false)}
           >
-            <Text style={styles.textStyle}>Close</Text>
+            <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -139,9 +168,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  textContainer: {
-    marginBottom: 10,
-  },
   requestText: {
     fontSize: 16,
     color: '#333',
@@ -149,8 +175,9 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    color: '#6200ea',
     fontWeight: 'bold',
+    color: '#6200ea',
+    marginBottom: 10,
   },
   screenshot: {
     width: 100,
@@ -181,13 +208,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 5,
   },
-  centeredView: {
+  modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
-  fullscreenImage: {
+  fullImage: {
     width: '90%',
     height: '80%',
     resizeMode: 'contain',
@@ -196,11 +223,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#6200ea',
     borderRadius: 8,
     padding: 10,
-    marginTop: 15,
+    marginTop: 20,
   },
-  textStyle: {
+  closeButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 16,
     textAlign: 'center',
   },
 });

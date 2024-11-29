@@ -12,56 +12,68 @@ const ProfileScreen = () => {
   const theme = lightTheme;
   const { user, logout } = useContext(AuthContext);
   const navigation = useNavigation();
-  const [lastBookingStatus, setLastBookingStatus] = useState(null);
-  const [lastRequestStatus, setLastRequestStatus] = useState(null);
-  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [lastBookingStatus, setLastBookingStatus] = useState('Loading...');
+  const [lastRequestStatus, setLastRequestStatus] = useState('Loading...');
 
-  // Fetch the last inquiry statuses
   useEffect(() => {
     const fetchLastInquiries = async () => {
-      if (!user) return;
-
+      if (!user) {
+        console.error('User not logged in');
+        setLastBookingStatus('No user logged in');
+        setLastRequestStatus('No user logged in');
+        return;
+      }
+  
       try {
-        // Fetch last booking status
+        console.log('Fetching bookings for user:', user.uid);
+  
+        // Fetch last booking
         const bookingQuery = query(
           collection(db, 'bookings'),
           where('userId', '==', user.uid),
-          orderBy('timestamp', 'desc'),
+          orderBy('createdAt', 'desc'),
           limit(1)
         );
         const bookingSnapshot = await getDocs(bookingQuery);
+  
         if (!bookingSnapshot.empty) {
           const lastBooking = bookingSnapshot.docs[0].data();
+          console.log('Last booking:', lastBooking);
           setLastBookingStatus(lastBooking.status || 'Pending');
         } else {
+          console.warn('No bookings found for user:', user.uid);
           setLastBookingStatus('No bookings found');
         }
-
-        // Fetch last request status
+  
+        console.log('Fetching requests for user:', user.uid);
+  
+        // Fetch last request
         const requestQuery = query(
           collection(db, 'requests'),
           where('userId', '==', user.uid),
-          orderBy('timestamp', 'desc'),
+          orderBy('createdAt', 'desc'),
           limit(1)
         );
         const requestSnapshot = await getDocs(requestQuery);
+  
         if (!requestSnapshot.empty) {
           const lastRequest = requestSnapshot.docs[0].data();
+          console.log('Last request:', lastRequest);
           setLastRequestStatus(lastRequest.status || 'Pending');
         } else {
+          console.warn('No requests found for user:', user.uid);
           setLastRequestStatus('No requests found');
         }
       } catch (error) {
         console.error('Error fetching inquiries:', error);
-        setLastBookingStatus('Error fetching status');
-        setLastRequestStatus('Error fetching status');
-      } finally {
-        setLoadingStatus(false);
+        setLastBookingStatus('Error fetching booking status');
+        setLastRequestStatus('Error fetching request status');
       }
     };
-
+  
     fetchLastInquiries();
   }, [user]);
+  
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -73,7 +85,7 @@ const ProfileScreen = () => {
         <View style={styles.cardContainer}>
           <View style={styles.card}>
             <Icon name="person" size={28} color={theme.primary} />
-            <Text style={styles.info}>{user.username}</Text>
+            <Text style={styles.info}>{user.username || 'Unknown User'}</Text>
           </View>
 
           <View style={styles.card}>
@@ -84,17 +96,13 @@ const ProfileScreen = () => {
           {/* Last Booking Status */}
           <View style={styles.card}>
             <Icon name="event" size={28} color={theme.primary} />
-            <Text style={styles.info}>
-              Last Booking Status: {loadingStatus ? 'Loading...' : lastBookingStatus}
-            </Text>
+            <Text style={styles.info}>Last Booking Status: {lastBookingStatus}</Text>
           </View>
 
           {/* Last Request Status */}
           <View style={styles.card}>
             <Icon name="request-quote" size={28} color={theme.primary} />
-            <Text style={styles.info}>
-              Last Request Status: {loadingStatus ? 'Loading...' : lastRequestStatus}
-            </Text>
+            <Text style={styles.info}>Last Request Status: {lastRequestStatus}</Text>
           </View>
 
           <TouchableOpacity

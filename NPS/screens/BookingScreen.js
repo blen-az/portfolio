@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -6,11 +6,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme } from './Theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { saveBooking } from '../services/bookingService';
+import { AuthContext } from '../context/AuthContext';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const BookingScreen = ({ navigation }) => {
-  const [firstName, setFirstMiddleName] = useState('');
+  const { user } = useContext(AuthContext);
+  const [firstName, setFirstName] = useState('');
+  const [MiddleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [paymentType, setPaymentType] = useState('SAT');
   const [notes, setNotes] = useState('');
@@ -24,26 +27,33 @@ const BookingScreen = ({ navigation }) => {
 
   const pickImage = async () => {
     try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (!permissionResult.granted) {
-        Alert.alert('Permission Required', 'Please grant media library permissions to upload a screenshot.');
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 1,
       });
-
       if (!result.canceled) {
         setScreenshot(result.assets[0].uri);
       }
     } catch (error) {
       console.error('Error picking image:', error);
       Alert.alert('Error', 'An error occurred while picking the image.');
+    }
+  };
+  
+  const uploadImage = async (uri) => {
+    try {
+      const storage = getStorage();
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = `screenshots/${Date.now()}.jpg`;
+      const storageRef = ref(storage, filename);
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      setScreenshot(downloadURL); // Save URL for later use
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload the image.');
     }
   };
 
@@ -67,6 +77,7 @@ const BookingScreen = ({ navigation }) => {
 
     const bookingDetails = {
       firstName,
+      MiddleName,
       lastName,
       sex,
       birthdate: birthdate.toISOString(),
@@ -75,25 +86,32 @@ const BookingScreen = ({ navigation }) => {
       socialMediaLink,
       screenshot,
       date: date.toISOString(),
+      userId: user.uid,
     };
 
     try {
-      const docRef = await addDoc(collection(db, 'bookings'), bookingDetails);
-      Alert.alert('Success', 'Booking Submitted Successfully!');
-      console.log('Document written with ID: ', docRef.id);
+      const response = await saveBooking(bookingDetails);
+      if (response.success) {
+        Alert.alert('Success', 'Booking Submitted Successfully!');
+        console.log('Booking ID:', response.id);
 
-      setFirstMiddleName('');
-      setLastName('');
-      setSex('');
-      setPaymentType('SAT');
-      setNotes('');
-      setSocialMediaLink('');
-      setScreenshot(null);
-      setBirthdate(new Date());
-      setDate(new Date());
+        // Reset form fields
+        setFirstName('');
+        setMiddleName('');
+        setLastName('');
+        setSex('');
+        setPaymentType('SAT');
+        setNotes('');
+        setSocialMediaLink('');
+        setScreenshot(null);
+        setBirthdate(new Date());
+        setDate(new Date());
+      } else {
+        Alert.alert('Error', `Failed to schedule the booking: ${response.message}`);
+      }
     } catch (error) {
-      console.error('Error adding document: ', error);
-      Alert.alert('Error', 'Failed to schedule the booking');
+      console.error('Error submitting booking:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -104,10 +122,17 @@ const BookingScreen = ({ navigation }) => {
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
-          placeholder="First & Middle Name"
+          placeholder="First Name"
           placeholderTextColor="#888"
           value={firstName}
-          onChangeText={setFirstMiddleName}
+          onChangeText={setFirstName}
+        />
+          <TextInput
+          style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
+          placeholder="Middle Name"
+          placeholderTextColor="#888"
+          value={MiddleName}
+          onChangeText={setMiddleName}
         />
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -158,9 +183,9 @@ const BookingScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Payment Day</Text>
         </TouchableOpacity>
         {showDatePicker && (
-          <DateTimePicker value={date} mode="date" display="default" onChange={onChangeBirthdate} />
+          <DateTimePicker value={date} mode="date" display="default" onChange={onChangeDate} />
         )}
-        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Payment Day: {birthdate.toDateString()}</Text>
+        <Text style={{ color: lightTheme.text, marginBottom: 20 }}>Payment Day: {date.toDateString()}</Text>
 
         <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
@@ -169,7 +194,7 @@ const BookingScreen = ({ navigation }) => {
           value={socialMediaLink}
           onChangeText={setSocialMediaLink}
         />
-          <TextInput
+        <TextInput
           style={[styles.input, { backgroundColor: lightTheme.secondary, color: lightTheme.text }]}
           placeholder="Additional Guide Notes (Optional)"
           placeholderTextColor="#888"

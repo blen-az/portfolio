@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, } from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { AuthContextProvider, useAuth } from './context/AuthContext';
 import AppNavigator from './navigation/AppNavigator';

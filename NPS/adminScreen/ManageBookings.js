@@ -1,215 +1,233 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, Image, Alert } from 'react-native';
-import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Image, TouchableOpacity, Modal } from 'react-native';
+import { fetchBookings, updateBooking, deleteBooking } from '../services/bookingService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ManageBookingsScreen = () => {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-    useEffect(() => {
-        const fetchBookings = async () => {
-            const bookingList = [];
-            const querySnapshot = await getDocs(collection(db, 'bookings'));
+  useEffect(() => {
+    loadBookings();
+  }, []);
 
-            querySnapshot.forEach((doc) => {
-                bookingList.push({ id: doc.id, ...doc.data() });
-            });
+  const loadBookings = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchBookings();
+      if (result.success) {
+        setBookings(result.bookings);
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to load bookings.');
+      }
+    } catch (error) {
+      console.error('Error loading bookings:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            setBookings(bookingList);
-            setLoading(false);
-        };
+  const handleUpdateStatus = async (id, newStatus) => {
+    if (newStatus === 'declined') {
+      // Remove the declined booking
+      const result = await deleteBooking(id);
+      if (result.success) {
+        Alert.alert('Success', 'Booking declined and removed.');
+        setBookings((prevBookings) => prevBookings.filter((booking) => booking.id !== id));
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to decline booking.');
+      }
+    } else {
+      // Update the booking status
+      const result = await updateBooking(id, { status: newStatus });
+      if (result.success) {
+        Alert.alert('Success', `Booking ${newStatus}.`);
+        setBookings((prevBookings) =>
+          prevBookings.map((booking) =>
+            booking.id === id ? { ...booking, status: newStatus } : booking
+          )
+        );
+      } else {
+        Alert.alert('Error', result.msg || 'Failed to update booking status.');
+      }
+    }
+  };
 
-        fetchBookings();
-    }, []);
+  const handleImagePress = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setModalVisible(true);
+  };
 
-    const updateStatus = async (id, newStatus, userId) => {
-        try {
-            const bookingRef = doc(db, 'bookings', id);
-            await updateDoc(bookingRef, { status: newStatus });
+  const renderBookingItem = ({ item }) => (
+    <View style={styles.bookingItem}>
+      <Text style={styles.bookingText}>First Name: {item.firstName}</Text>
+      <Text style={styles.bookingText}>Middle Name: {item.MiddleName}</Text>
+      <Text style={styles.bookingText}>Last Name: {item.lastName}</Text>
+      <Text style={styles.bookingText}>Sex: {item.sex}</Text>
+      <Text style={styles.bookingText}>Birthdate: {new Date(item.birthdate).toDateString()}</Text>
+      <Text style={styles.bookingText}>Payment Type: {item.paymentType}</Text>
+      <Text style={styles.bookingText}>Notes: {item.notes}</Text>
+      <Text style={styles.bookingText}>Social Media Link: {item.socialMediaLink}</Text>
+      {item.screenshot && (
+        <TouchableOpacity onPress={() => handleImagePress(item.screenshot)}>
+          <Image source={{ uri: item.screenshot }} style={styles.screenshot} />
+        </TouchableOpacity>
+      )}
+      <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.acceptButton]}
+          onPress={() => handleUpdateStatus(item.id, 'accepted')}
+        >
+          <Icon name="check-circle" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Accept</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.declineButton]}
+          onPress={() => handleUpdateStatus(item.id, 'declined')}
+        >
+          <Icon name="cancel" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Decline</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
-            Alert.alert('Success', `Booking status updated to ${newStatus}`);
-        } catch (error) {
-            Alert.alert('Error', `Failed to update status: ${error.message}`);
-        }
-    };
-
-    const handleImagePress = (imageUrl) => {
-        setSelectedImage(imageUrl);
-        setModalVisible(true);
-    };
-
-    const renderBookingItem = ({ item }) => (
-        <View style={styles.bookingItem}>
-            <View style={styles.textContainer}>
-                <Text style={styles.bookingText}>Name: {item.firstName} {item.lastName}</Text>
-                <Text style={styles.bookingText}>Booking Type: {item.paymentType}</Text>
-                <Text style={styles.bookingText}>Social Media Link: {item.socialMediaLink || 'N/A'}</Text>
-                <Text style={styles.bookingText}>Scheduled Date: {new Date(item.date).toLocaleString()}</Text>
-                <Text style={styles.statusText}>Status: {item.status || 'Pending'}</Text>
-                {item.screenshot && (
-                    <TouchableOpacity onPress={() => handleImagePress(item.screenshot)}>
-                        <Image source={{ uri: item.screenshot }} style={styles.screenshot} />
-                    </TouchableOpacity>
-                )}
-            </View>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity 
-                    onPress={() => updateStatus(item.id, 'approved', item.userId)} 
-                    style={[styles.button, styles.approveButton]}
-                >
-                    <Icon name="check-circle" size={24} color="#fff" />
-                    <Text style={styles.buttonText}>Approve</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    onPress={() => updateStatus(item.id, 'declined', item.userId)} 
-                    style={[styles.button, styles.declineButton]}
-                >
-                    <Icon name="cancel" size={24} color="#fff" />
-                    <Text style={styles.buttonText}>Decline</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
+  if (loading) {
     return (
-        <View style={styles.container}>
-            {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#6200ea" />
-                    <Text style={styles.loadingText}>Loading Bookings...</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={bookings}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContainer}
-                    renderItem={renderBookingItem}
-                />
-            )}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    Alert.alert("Modal has been closed.");
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.centeredView}>
-                    <Image source={{ uri: selectedImage }} style={styles.fullscreenImage} />
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => setModalVisible(!modalVisible)}
-                    >
-                        <Text style={styles.textStyle}>Close</Text>
-                    </TouchableOpacity>
-                </View>
-            </Modal>
-        </View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6200ea" />
+        <Text style={styles.loadingText}>Loading Bookings...</Text>
+      </View>
     );
+  }
+
+  if (bookings.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>No bookings available.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={bookings}
+        keyExtractor={(item) => item.id}
+        renderItem={renderBookingItem}
+        contentContainerStyle={styles.listContainer}
+      />
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Image source={{ uri: selectedImage }} style={styles.fullImage} />
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 10,
-        backgroundColor: '#f5f5f5'
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#6200ea',
-    },
-    listContainer: {
-        padding: 15,
-    },
-    bookingItem: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        padding: 15,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-    },
-    textContainer: {
-        marginBottom: 10,
-    },
-    bookingText: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 5,
-    },
-    statusText: {
-        fontSize: 16,
-        color: '#6200ea',
-        fontWeight: 'bold',
-    },
-    screenshot: {
-        width: 100,
-        height: 100,
-        marginTop: 10,
-        borderRadius: 5,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        borderRadius: 8,
-        width: '48%',
-        justifyContent: 'center',
-    },
-    approveButton: {
-        backgroundColor: '#4CAF50',
-    },
-    declineButton: {
-        backgroundColor: '#F44336',
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 14,
-        marginLeft: 5,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)'
-    },
-    fullscreenImage: {
-        width: '90%',
-        height: '80%',
-        resizeMode: 'contain',
-        marginBottom: 20
-    },
-    closeButton: {
-        backgroundColor: "#2196F3",
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2
-    },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center"
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#6200ea',
+  },
+  listContainer: {
+    padding: 15,
+  },
+  bookingItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    elevation: 3,
+  },
+  bookingText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6200ea',
+    marginBottom: 10,
+  },
+  screenshot: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
+    borderRadius: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    width: '48%',
+    justifyContent: 'center',
+  },
+  acceptButton: {
+    backgroundColor: '#4CAF50',
+  },
+  declineButton: {
+    backgroundColor: '#F44336',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    marginLeft: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  fullImage: {
+    width: '90%',
+    height: '80%',
+    resizeMode: 'contain',
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#6200ea',
+    padding: 10,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
 });
 
 export default ManageBookingsScreen;
