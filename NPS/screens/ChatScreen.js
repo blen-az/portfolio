@@ -31,26 +31,48 @@ const ChatScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
   const userId = user?.uid || 'testUser';
 
-  const [isSending, setIsSending] = useState(false); // Prevent sending multiple times
-  const [unsubscribe, setUnsubscribe] = useState(null);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    // Fetch messages in real-time
-    const unsubscribeFunction = fetchMessages(userId, setMessages, setUnsubscribe);
+    const initializeChat = async () => {
+      const unsubscribeFunction = await fetchMessages(userId, (newMessages) => {
+        if (setMessages && typeof setMessages === 'function') {
+          const formattedMessages = newMessages.map((msg) => ({
+            ...msg,
+            timestamp: msg.timestamp?.toDate().toISOString() || null, // Format timestamp
+          }));
+          setMessages(formattedMessages);
+        } else {
+          console.error("setMessages is not a function or undefined");
+        }
+      });
 
-    // Add a welcome message when the chat initializes
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        id: 'welcome',
-        senderId: 'system',
-        message: 'Welcome to the chat! How can we assist you today?',
-      },
-    ]);
+      const initialMessages = await fetchMessagesFromDatabase(userId);
+      if (initialMessages.length === 0) {
+        await sendMessage(userId, 'Welcome to the chat! How can we assist you today?', '');
+      }
 
-    // Cleanup function to unsubscribe from Firestore updates
+      return unsubscribeFunction;
+    };
+
+    const fetchMessagesFromDatabase = async (userId) => {
+      try {
+        const messages = await fetchMessages(userId);
+        return messages || [];
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        return [];
+      }
+    };
+
+    const unsubscribe = initializeChat();
+
     return () => {
-      if (unsubscribeFunction) unsubscribeFunction();
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      } else {
+        console.error("Unsubscribe is not a function:", unsubscribe);
+      }
     };
   }, [userId]);
 
@@ -62,16 +84,15 @@ const ChatScreen = ({ navigation }) => {
 
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
-      console.log('Image URI:', result.assets[0].uri); // Log for debugging
+      console.log('Image URI:', result.assets[0].uri);
     }
   };
 
   const handleSendMessage = async () => {
-    // Prevent sending the message if already sending or no content
     if (isSending || (!message.trim() && !imageUri)) return;
 
-    setIsSending(true); // Lock sending until the image is uploaded
-
+    setIsSending(true);
+    setIsLoading(true);
     let uploadedImageUrl = '';
 
     if (imageUri) {
@@ -84,68 +105,33 @@ const ChatScreen = ({ navigation }) => {
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
       try {
-        setIsLoading(true); // Show the loading spinner on send
-        const response = await fetch(CLOUDINARY_URL, {
-          method: 'POST',
-          body: formData,
-        });
+        const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
         const data = await response.json();
-        if (data.secure_url) {
-          uploadedImageUrl = data.secure_url;
-          console.log('Uploaded Image URL:', uploadedImageUrl);
-        } else {
-          console.error('Image upload failed:', data.error.message);
-          setIsSending(false); // Unlock if upload fails
-          setIsLoading(false);
-          return;
-        }
+        uploadedImageUrl = data.secure_url || '';
       } catch (error) {
         console.error('Image upload error:', error);
-        setIsSending(false); // Unlock after error
+        setIsSending(false);
         setIsLoading(false);
         return;
       }
     }
 
-    // Send the message to Firestore
     const success = await sendMessage(userId, message, uploadedImageUrl);
     if (success) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: Math.random().toString(),
-          senderId: userId,
-          message: message,
-          imageUrl: uploadedImageUrl,
-        },
-      ]);
-
-      // Add an autoresponse
-      setTimeout(() => {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: Math.random().toString(),
-            senderId: 'system',
-            message: 'Thank you for your message! We will get back to you shortly.',
-          },
-        ]);
-      }, 2000); // Delay autoresponse by 2 seconds
-
       setMessage('');
-      setImageUri(null); // Clear the image after sending
+      setImageUri(null);
     } else {
       console.error('Failed to send message');
     }
 
-    setIsSending(false); // Unlock after sending
+    setIsSending(false);
     setIsLoading(false);
     Keyboard.dismiss();
   };
 
   const handleImagePress = (imageUrl) => {
-    setCurrentImage([{ url: imageUrl }]); // Set the current image for zooming
-    setIsModalVisible(true); // Open the zoom modal
+    setCurrentImage([{ url: imageUrl }]);
+    setIsModalVisible(true);
   };
 
   return (
@@ -173,13 +159,15 @@ const ChatScreen = ({ navigation }) => {
             >
               {msg.imageUrl && (
                 <TouchableOpacity onPress={() => handleImagePress(msg.imageUrl)}>
-                  <Image
-                    source={{ uri: msg.imageUrl }}
-                    style={styles.imageStyle} // Apply imageStyle here
-                  />
+                  <Image source={{ uri: msg.imageUrl }} style={styles.imageStyle} />
                 </TouchableOpacity>
               )}
               <Text style={styles.messageText}>{msg.message}</Text>
+              {msg.timestamp && (
+                <Text style={styles.timestampText}>
+                  {new Date(msg.timestamp).toLocaleString()}
+                </Text>
+              )}
             </View>
           ))}
         </ScrollView>
@@ -196,7 +184,6 @@ const ChatScreen = ({ navigation }) => {
             placeholder="Type a message..."
             value={message}
             onChangeText={setMessage}
-            onFocus={() => setImageUri(null)} // Clear image when focusing on text input
             placeholderTextColor={lightTheme.text}
           />
           <TouchableOpacity onPress={handlePickImage} style={{ marginRight: 10 }}>
@@ -208,9 +195,9 @@ const ChatScreen = ({ navigation }) => {
               isLoading || (!message && !imageUri) ? { opacity: 0.5 } : {},
             ]}
             onPress={handleSendMessage}
-            disabled={isSending || isLoading || (!message && !imageUri)} // Disable send when no message or image
+            disabled={isSending || isLoading || (!message && !imageUri)}
           >
-            {isLoading ? (
+            {isSending || isLoading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text style={styles.sendButtonText}>Send</Text>
@@ -218,11 +205,10 @@ const ChatScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Modal for zooming the image */}
         <Modal isVisible={isModalVisible} style={styles.modal}>
           <ImageViewer
-            imageUrls={currentImage} // The image to zoom
-            onCancel={() => setIsModalVisible(false)} // Close modal on cancel
+            imageUrls={currentImage}
+            onCancel={() => setIsModalVisible(false)}
             enableSwipeDown={true}
           />
         </Modal>
@@ -252,12 +238,11 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   messageBubble: {
-    paddingVertical: 5, // Reduced vertical padding
-    paddingHorizontal: 10, // Maintain horizontal padding for the bubble
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 15,
     marginVertical: 5,
     maxWidth: '80%',
-    backgroundColor: 'transparent', // No background for the text bubble
   },
   adminBubble: {
     alignSelf: 'flex-start',
@@ -270,20 +255,23 @@ const styles = StyleSheet.create({
   messageText: {
     color: lightTheme.text,
   },
-
-  // Image styling - no bubble, no padding, no background
-  imageStyle: {
-    width: 150, // Adjusted size
-    height: 150, // Adjusted size
-    borderRadius: 10,
-    marginBottom: 5, // Optional: margin to space out image and text
-    backgroundColor: 'transparent', // No background behind the image
-  },
   systemBubble: {
     alignSelf: 'center',
     backgroundColor: lightTheme.secondary,
     padding: 10,
     borderRadius: 15,
+  },
+  imageStyle: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  timestampText: {
+    fontSize: 10,
+    color: 'gray',
+    marginTop: 5,
+    alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -307,8 +295,8 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   modal: {
-    margin: 0, // Full-screen modal
-    justifyContent: 'center', // Center the image in the modal
+    margin: 0,
+    justifyContent: 'center',
   },
 });
 
