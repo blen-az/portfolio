@@ -100,7 +100,7 @@ const RequestScreen = ({ navigation }) => {
     try {
       const response = await saveRequest(user.uid, requestDetails);
       if (response.success) {
-        Alert.alert('Success', 'Request Submitted Successfully Check status on your profile');
+        Alert.alert('Success', 'Request Submitted Successfully! Check status on your profile');
         setFirstName('');
         setMiddleName('')
         setLastName('');
@@ -223,18 +223,6 @@ const RequestScreen = ({ navigation }) => {
           value={notes}
           onChangeText={setNotes}
         />
-
-
-        <View style={styles.uploadContainer}>
-        <Text style={[styles.infoText, {color: theme.text}]}>Upload a screenshot (Optional):</Text>
-          <TouchableOpacity          
-            style={[styles.imagePickerButton, { backgroundColor: theme.primary }]}
-            onPress={pickImage}
-          >
-            <Text style={styles.buttonText}>Upload Screenshot</Text>
-          </TouchableOpacity>
-          {screenshot && <Image source={{ uri: screenshot }} style={styles.screenshot} />}
-        </View>
 
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.primary }]}
